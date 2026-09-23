@@ -1,0 +1,38 @@
+{
+  "tags": {
+    "Project": {
+      "tag_key": { "@@assign": "Project" }
+    },
+    "Application": {
+      "tag_key": { "@@assign": "Application" }
+    },
+    "Environment": {
+      "tag_key": { "@@assign": "Environment" },
+      "tag_value": {
+        "@@assign": ["dev", "test", "stage", "prod"]
+      },
+      "enforced_for": {
+        "@@assign": [
+          "ec2:instance",
+          "ec2:volume",
+          "rds:db",
+          "s3:bucket",
+          "lambda:function"
+        ]
+      }
+    },
+    "BusinessUnit": {
+      "tag_key": { "@@assign": "BusinessUnit" },
+      "tag_value": {
+        "@@assign": [
+          "Engineering",
+          "Product",
+          "Finance",
+          "Marketing",
+          "Sales",
+          "Operations"
+        ]
+      }
+    }
+  }
+}

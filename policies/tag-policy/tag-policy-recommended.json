@@ -1,0 +1,13 @@
+{
+  "tags": {
+    "Name": {
+      "tag_key": { "@@assign": "Name" }
+    },
+    "Owner": {
+      "tag_key": { "@@assign": "Owner" }
+    },
+    "Description": {
+      "tag_key": { "@@assign": "Description" }
+    }
+  }
+}

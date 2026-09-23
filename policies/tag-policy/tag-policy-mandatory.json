@@ -1,0 +1,28 @@
+{
+  "tags": {
+    "Environment": {
+      "tag_key": { "@@assign": "Environment" },
+      "tag_value": {
+        "@@assign": ["Development", "Staging", "QA", "Production"]
+      }
+    },
+    "Team": {
+      "tag_key": { "@@assign": "Team" },
+      "tag_value": {
+        "@@assign": ["Platform", "Security", "DevOps", "Backend", "Frontend", "Data", "SRE"]
+      }
+    },
+    "CostCenter": {
+      "tag_key": { "@@assign": "CostCenter" },
+      "tag_value": {
+        "@@assign": ["Engineering", "Operations", "Research", "Sales", "Marketing"]
+      }
+    },
+    "ManagedBy": {
+      "tag_key": { "@@assign": "ManagedBy" },
+      "tag_value": {
+        "@@assign": ["Terraform", "CloudFormation", "Manual"]
+      }
+    }
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "services": {
+    "@@operators_allowed_for_child_policies": ["@@none"],
+    "default": {
+      "opt_out_policy": { "@@assign": "optIn" }
+    },
+    "rekognition": {
+      "opt_out_policy": { "@@assign": "optOut" }
+    },
+    "comprehend": {
+      "opt_out_policy": { "@@assign": "optOut" }
+    },
+    "transcribe": {
+      "opt_out_policy": { "@@assign": "optOut" }
+    },
+    "textract": {
+      "opt_out_policy": { "@@assign": "optOut" }
+    },
+    "lex": {
+      "opt_out_policy": { "@@assign": "optOut" }
+    },
+    "polly": {
+      "opt_out_policy": { "@@assign": "optOut" }
+    },
+    "translate": {
+      "opt_out_policy": { "@@assign": "optOut" }
+    },
+    "codeguruprofiler": {
+      "opt_out_policy": { "@@assign": "optOut" }
+    }
+  }
+}

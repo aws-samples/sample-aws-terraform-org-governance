@@ -1,0 +1,49 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "DenyExpensiveServices",
+      "Effect": "Deny",
+      "Action": [
+        "redshift:CreateCluster",
+        "redshift-serverless:CreateNamespace",
+        "redshift-serverless:CreateWorkgroup",
+        "elasticmapreduce:RunJobFlow",
+        "sagemaker:CreateTrainingJob",
+        "sagemaker:CreateHyperParameterTuningJob",
+        "sagemaker:CreateEndpoint",
+        "sagemaker:CreateNotebookInstance",
+        "sagemaker:CreateDomain",
+        "quicksight:CreateAccountSubscription",
+        "es:CreateElasticsearchDomain",
+        "es:CreateDomain",
+        "opensearch:CreateDomain"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "DenyLargeEC2Instances",
+      "Effect": "Deny",
+      "Action": "ec2:RunInstances",
+      "Resource": "arn:aws:ec2:*:*:instance/*",
+      "Condition": {
+        "ForAnyValue:StringLike": {
+          "ec2:InstanceType": [
+            "*.8xlarge",
+            "*.12xlarge",
+            "*.16xlarge",
+            "*.24xlarge",
+            "*.32xlarge",
+            "*.metal",
+            "p3.*",
+            "p4.*",
+            "p5.*",
+            "x1.*",
+            "x2.*",
+            "u-*"
+          ]
+        }
+      }
+    }
+  ]
+}

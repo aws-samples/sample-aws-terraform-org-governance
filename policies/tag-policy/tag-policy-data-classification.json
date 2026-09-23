@@ -1,0 +1,19 @@
+{
+  "tags": {
+    "DataClassification": {
+      "tag_key": { "@@assign": "DataClassification" },
+      "tag_value": {
+        "@@assign": ["Public", "Internal", "Confidential", "Restricted", "PII"]
+      },
+      "enforced_for": {
+        "@@assign": [
+          "s3:bucket",
+          "rds:db",
+          "rds:cluster",
+          "dynamodb:table",
+          "secretsmanager:secret"
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,95 @@
+# GitLab CI — validation and security scanning for this Terraform sample.
+#
+# Scan-only: nothing here authenticates to AWS or runs terraform plan/apply.
+# `terraform init` runs with -backend=false so no credentials or state are
+# needed to type-check the configuration.
+#
+#   validate → terraform fmt / validate / tflint (mirrors .pre-commit-config.yaml)
+#   scan     → IaC misconfiguration, committed secrets, and the AWS Automated
+#              Security Helper bundle
+#
+# Results appear in the MR "Security" widget and the project Vulnerability
+# Report.
+
+stages:
+  - validate
+  - scan
+
+variables:
+  # Vendored provider caches are not our code, and docs/ holds generated
+  # diagram artifacts.
+  SAST_EXCLUDED_PATHS: ".terraform, docs"
+  SECRET_DETECTION_HISTORIC_SCAN: "false"
+
+# ---------------------------------------------------------------------------
+# Validate — the same three checks the pre-commit hooks run locally, so a
+# contributor who skipped the hooks still gets caught here.
+# ---------------------------------------------------------------------------
+terraform:
+  stage: validate
+  image:
+    name: hashicorp/terraform:1.14
+    entrypoint: [""]
+  script:
+    - terraform fmt -check -recursive -diff
+    - terraform init -backend=false -input=false
+    - terraform validate
+  cache:
+    key: "terraform-providers"
+    paths:
+      - .terraform/providers
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+
+tflint:
+  stage: validate
+  image:
+    name: ghcr.io/terraform-linters/tflint:latest
+    entrypoint: [""]
+  script:
+    - tflint --recursive
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+
+# ---------------------------------------------------------------------------
+# GitLab managed scanners. Application SAST is omitted deliberately — this
+# repo holds no application code, only Terraform and policy JSON.
+# ---------------------------------------------------------------------------
+include:
+  - template: Jobs/SAST-IaC.gitlab-ci.yml
+  - template: Jobs/Secret-Detection.gitlab-ci.yml
+
+# Re-map the included jobs out of their default `test` stage so the pipeline
+# reads validate → scan top to bottom.
+iac-sast:
+  stage: scan
+
+secret_detection:
+  stage: scan
+
+# ---------------------------------------------------------------------------
+# ASH — AWS Automated Security Helper. Runs Checkov, cfn-nag, git-secrets and
+# Grype/Syft in one pass, adding AWS-specific IaC checks on top of the GitLab
+# analyzers. Non-blocking so a new finding surfaces in the report rather than
+# hard-failing the pipeline.
+# ---------------------------------------------------------------------------
+ash:
+  stage: scan
+  image:
+    name: public.ecr.aws/docker/library/python:3.13-slim
+  before_script:
+    - apt-get update && apt-get install -y --no-install-recommends git
+    - pip install --no-cache-dir automated-security-helper
+  script:
+    - ash --source-dir . --output-dir ash_output || true
+  artifacts:
+    when: always
+    paths:
+      - ash_output/
+    expire_in: 1 week
+  allow_failure: true
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
