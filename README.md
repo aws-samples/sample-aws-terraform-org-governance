@@ -1,6 +1,6 @@
 # sample-aws-terraform-org-governance
 
-Terraform sample code for managing AWS Organization governance on top of an existing Control Tower Landing Zone. Covers OU hierarchies, all six AWS Organizations policy types (SCP, RCP, Tag, Backup, AI opt-out, Chatbot), Control Tower baselines and controls, and delegated administrator configuration for 15 AWS services.
+Terraform sample code for managing governance in AWS Organizations on top of an existing AWS Control Tower landing zone. Covers OU hierarchies, six of the AWS Organizations policy types (service control, resource control, tag, backup, AI services opt-out, and chat applications policies), AWS Control Tower baselines and controls, and delegated administrator configuration for 15 AWS services.
 
 ## Disclaimer
 
@@ -10,7 +10,7 @@ The policies in this repository take effect immediately on attachment and apply 
 
 ## Architecture
 
-Four figures, each carrying something the others cannot:
+The following four figures each show something the others cannot:
 
 | Figure | Answers |
 | ------ | ------- |
@@ -21,42 +21,42 @@ Four figures, each carrying something the others cannot:
 
 ### Governance topology
 
-![AWS Organization governance on a Control Tower landing zone](docs/diagrams/org-governance-topology.svg)
+![Governance in AWS Organizations on an AWS Control Tower landing zone](docs/diagrams/org-governance-topology.svg)
 
-This is a **root Terraform deployment**, not a module. It consumes no external modules, holds no provider aliases, and runs in exactly one place: the **organization's management account**, in the Control Tower home region. From there it writes three independent kinds of governance onto the OU tree — Organizations policies, Control Tower baselines and controls, and delegated administration.
+This is a **root Terraform deployment**, not a module. It consumes no external modules, holds no provider aliases, and runs in exactly one place: the **organization's management account**, in the AWS Control Tower home Region. From there it writes three independent kinds of governance onto the OU tree — AWS Organizations policies, AWS Control Tower baselines and controls, and delegated administration.
 
-Four things worth naming explicitly:
+Note the following four behaviors:
 
 1. **Nothing is created in a member account.** Delegated administration designates an account; it does not deploy into it. The single exception is `aws_macie2_account`, which enables Macie in the _management_ account because AWS requires that before a Macie delegated administrator can be designated.
-2. **Policies attach, they do not nest.** A policy document is created once and attached to as many targets as you list. Inheritance down the OU tree is an Organizations behaviour, not something this configuration models.
-3. **Controls target OUs, never the root.** Control Tower controls resolve to an OU ARN, so `"root"` is not an addressable target for them the way it is for policies.
-4. **RAM sharing is a single organization-wide toggle** with no OU dimension at all.
+2. **Policies attach, they do not nest.** A policy document is created once and attached to as many targets as you list. Inheritance down the OU tree is an AWS Organizations behavior, not something this sample models.
+3. **Controls target OUs, never the root.** AWS Control Tower controls resolve to an OU ARN, so `"root"` is not an addressable target for them the way it is for policies.
+4. **AWS Resource Access Manager (AWS RAM) sharing is a single organization-wide toggle** with no OU dimension at all.
 
-The delegated administrator is drawn as a separate account because that is what it is. Conventionally it sits inside the `Security` OU — Control Tower places the Audit account there — but the configuration only takes an account ID and does not constrain where that account lives. The figure shows four of the 15 supported services; [Delegated administration](#delegated-administration) has the complete list.
+The figure shows the delegated administrator as a separate account. Conventionally it sits inside the `Security` OU, where AWS Control Tower places the Audit account, but this sample takes only an account ID and does not constrain where that account lives. The figure shows four of the 15 supported services; [Delegated administration](#delegated-administration) has the complete list.
 
 ### Ownership boundary
 
-This assumes Control Tower already exists, and deliberately stops at that boundary:
+This sample assumes that AWS Control Tower already exists, and it stops at that boundary:
 
-| This configuration owns                                        | Control Tower owns                                                  |
+| This configuration owns                                        | AWS Control Tower owns                                                  |
 | -------------------------------------------------------------- | ------------------------------------------------------------------- |
 | OUs you declare in `var.organization`, up to five levels deep   | The `Security` and `Sandbox` OUs, and the Audit and Log Archive accounts |
-| All six AWS Organizations policy types, and their attachments   | The landing zone itself, and its own mandatory guardrails            |
-| Which Control Tower baseline version each OU is registered at   | The baseline's contents                                              |
+| Six AWS Organizations policy types, and their attachments       | The landing zone itself, and its own mandatory controls            |
+| Which AWS Control Tower baseline version each OU is registered at   | The baseline's contents                                              |
 | Which controls are enabled on which OU                         | The control catalog                                                  |
 | Delegated administrator designation for 15 services            | —                                                                    |
 
-Declaring a Control Tower OU in `var.organization` would make Terraform try to create it and fail. Targeting one from a policy or a control is supported and expected — see [Addressing targets](#addressing-targets).
+Declaring an AWS Control Tower OU in `var.organization` would make Terraform try to create it and fail. Targeting one from a policy or a control is supported and expected — see [Addressing targets](#addressing-targets).
 
 ### What each policy type bounds
 
 ![Service control policies bound principals; resource control policies bound resources, including access from outside the organization](docs/diagrams/org-policy-surfaces.svg)
 
-This is why the configuration manages more than one policy type. A **service control policy** bounds what principals *inside* a member account may do — it is the familiar guardrail, and it has no effect on a caller outside the organization. A **resource control policy** bounds what may be done *to* the account's resources, so it reaches a principal an SCP cannot see at all. The remaining four types govern different dimensions again: tag policies enforce tag key casing and allowed values, backup policies apply AWS Backup plans, AI services opt-out policies keep your content out of AI/ML service improvement, and chat applications policies restrict which Slack workspaces and Microsoft Teams channels can reach your accounts.
+This is why the configuration manages more than one policy type. A **service control policy** bounds what principals *inside* a member account may do — it is the familiar preventive policy, and it has no effect on a caller outside the organization. A **resource control policy** bounds what may be done *to* the account's resources, so it reaches a principal that an SCP cannot evaluate. The remaining four types govern different dimensions again: tag policies enforce tag key casing and allowed values, backup policies apply AWS Backup plans, AI services opt-out policies keep your content out of AI/ML service improvement, and chat applications policies restrict which Slack workspaces and Microsoft Teams channels can reach your accounts.
 
 ### OU nesting and ordering
 
-![One OU branch at maximum depth, with Control Tower registering the baseline parent before child](docs/diagrams/org-ou-nesting.svg)
+![One OU branch at maximum depth, with AWS Control Tower registering the baseline parent before child](docs/diagrams/org-ou-nesting.svg)
 
 The governance topology figure shows the OU tree as a flat row of siblings, which cannot show depth. AWS permits five levels beneath the root and the configuration implements exactly that. The figure also shows the one ordering AWS imposes and Terraform cannot infer, which the next section explains.
 
@@ -65,7 +65,7 @@ The governance topology figure shows the OU tree as a flat row of siblings, whic
 Most of the ordering is implicit; it falls out of one resource referencing another's attribute. Two places need explicit `depends_on` because AWS imposes an order the data flow does not express:
 
 - **OU levels order themselves.** `level_2_ous` uses `aws_organizations_organizational_unit.level_1_ous[each.value.parent].id` as its `parent_id`, so a level cannot start before its parent finishes. No `depends_on` needed.
-- **Baselines are chained explicitly.** `aws_controltower_baseline.level_2` carries `depends_on = [aws_controltower_baseline.level_1]`, and so on to level 5. Without it Terraform would register all five levels in parallel and Control Tower would reject the children.
+- **Baselines are chained explicitly.** `aws_controltower_baseline.level_2` carries `depends_on = [aws_controltower_baseline.level_1]`, and so on to level 5. Without it Terraform would register all five levels in parallel and AWS Control Tower would reject the children.
 - **Controls wait on the level 1 baseline.** `aws_controltower_control.controls` depends on `aws_controltower_baseline.level_1` rather than on the baseline for its own target OU — a deliberate simplification, since the level 1 registration is what enables the control plane for the tree.
 - **Policy documents are independent of the tree.** Each `aws_organizations_policy` resource only reads files from disk. It is the _attachment_ that references an OU ID, so the attachment carries the dependency.
 - **Delegations and RAM sharing have no ordering constraint** and run concurrently with everything else.
@@ -76,9 +76,9 @@ Most of the ordering is implicit; it falls out of one resource referencing anoth
 
 Every service above is optional and is enabled by setting a member account ID; leave one unset to skip it. The governance topology figure shows only four of them, so this figure is the complete list.
 
-Two icons are borrowed from the correct console family because no icon exists for the feature itself, each labelled with its precise official name: **AWS Identity and Access Management** stands for IAM Access Analyzer, and **Amazon Virtual Private Cloud** for IP Address Manager.
+Two icons are borrowed from the correct console family because no icon exists for the feature itself, each labeled with its precise official name: **AWS Identity and Access Management** stands for IAM Access Analyzer, and **Amazon Virtual Private Cloud** for IP Address Manager.
 
-The delegation mechanism is not uniform, which matters when scoping the deploying role's permissions. AWS Backup, AWS CloudFormation StackSets, AWS CloudTrail, AWS Config, IAM Access Analyzer, IAM Identity Center, AWS Organizations and AWS Systems Manager are delegated through `organizations:RegisterDelegatedAdministrator`. Amazon GuardDuty, AWS Security Hub, Amazon Detective and Amazon Macie each use their own `EnableOrganizationAdminAccount` action; Amazon Inspector uses `inspector2:EnableDelegatedAdminAccount`, AWS Firewall Manager `fms:AssociateAdminAccount`, and Amazon VPC IP Address Manager `ec2:EnableIpamOrganizationAdminAccount`.
+The delegation mechanism is not uniform, which matters when scoping the deploying role's permissions. AWS Backup, AWS CloudFormation StackSets, AWS CloudTrail, AWS Config, IAM Access Analyzer, AWS IAM Identity Center, AWS Organizations, and AWS Systems Manager use `organizations:RegisterDelegatedAdministrator`. Amazon GuardDuty, AWS Security Hub CSPM, Amazon Detective, and Amazon Macie each use their own `EnableOrganizationAdminAccount` action; Amazon Inspector uses `inspector2:EnableDelegatedAdminAccount`, AWS Firewall Manager `fms:AssociateAdminAccount`, and Amazon VPC IP Address Manager `ec2:EnableIpamOrganizationAdminAccount`.
 
 > **Note:** Setting the Macie delegation also enables Macie in the management account, because AWS requires that before a Macie delegated administrator can be designated.
 
@@ -86,26 +86,31 @@ All four figures use the official AWS Architecture Icons and are rendered to SVG
 
 ## What It Does
 
-1. Creates additional OUs beyond what Control Tower provides (up to 5 nesting levels)
-2. Registers each OU with the Control Tower baseline — parent before children
-3. Creates and attaches any of the six AWS Organizations policy types to target OUs:
-   - **SCPs** — Service Control Policies (deny guardrails on IAM principals)
-   - **RCPs** — Resource Control Policies (deny guardrails on resources, including external principals)
-   - **Tag Policies** — enforce tag key casing and allowed values
-   - **Backup Policies** — org-wide AWS Backup plans
+1. Creates additional OUs beyond what AWS Control Tower provides (up to 5 nesting levels)
+2. Registers each OU with the AWS Control Tower baseline — parent before children
+3. Creates and attaches six of the AWS Organizations policy types to target OUs:
+   - **SCPs** — service control policies (deny statements on IAM principals)
+   - **RCPs** — resource control policies (deny statements on resources, including external principals)
+   - **Tag policies** — enforce tag key casing and allowed values
+   - **Backup policies** — organization-wide AWS Backup plans
    - **AI Services Opt-Out** — prevent AWS from using content for AI/ML improvement
-   - **Chatbot Policies** — restrict Slack/Teams integrations
-4. Enables Control Tower controls on target OUs (legacy `AWS-GR_*` and proactive `CT.*`/`SH.*` controls)
+   - **Chat applications policies** — restrict which Slack workspaces and Microsoft Teams channels can reach your accounts through Amazon Q Developer in chat applications
+
+   AWS Organizations has more policy types, such as Amazon EC2 declarative policies, Security Hub policies, Amazon Inspector policies, Amazon Bedrock policies, Amazon S3 policies, Amazon GuardDuty policies, and upgrade rollout policies. This sample does not manage them.
+4. Enables AWS Control Tower controls on target OUs (legacy `AWS-GR_*` and proactive `CT.*`/`SH.*` controls)
 5. Delegates administration of 15 AWS services to designated member accounts
-6. Optionally enables organization-wide RAM sharing
+6. Optionally enables organization-wide AWS RAM sharing
 7. Ships with a reusable policy template library and five scenario-based examples (minimal, standard, enterprise, regulated-workload, data-residency)
 
 ## Prerequisites
 
-- AWS Control Tower Landing Zone deployed and operational
-- `Security` and `Sandbox` OUs already exist (created by Control Tower)
-- Audit and Log Archive accounts provisioned by Control Tower
-- Terraform executed from the **management account** with appropriate IAM permissions
+- AWS Control Tower landing zone deployed and operational
+- `Security` and `Sandbox` OUs already exist (created by AWS Control Tower)
+- Audit and Log Archive accounts provisioned by AWS Control Tower
+- Terraform executed from the **management account**
+- AWS Command Line Interface (AWS CLI), installed and configured
+- An AWS Identity and Access Management (IAM) role in the management account with permissions to deploy this sample, and permission to assume it
+- A configured Terraform backend
 - SCP policy type enabled in the organization:
   ```bash
   aws organizations enable-policy-type --root-id r-xxxx --policy-type SERVICE_CONTROL_POLICY
@@ -124,9 +129,9 @@ All four figures use the official AWS Architecture Icons and are rendered to SVG
 1. Pick an example from [`examples/`](./examples) that matches your use case:
    - [`minimal`](./examples/minimal) — OU hierarchy only, nothing else
    - [`standard`](./examples/standard) — SCP + RCP + tag policies + daily backup plan
-   - [`enterprise`](./examples/enterprise) — all six policy types, 15 delegations, broad CT controls
+   - [`enterprise`](./examples/enterprise) — all six managed policy types, 15 delegations, broad AWS Control Tower controls
    - [`regulated-workload`](./examples/regulated-workload) — strict encryption/MFA/audit + RCP + critical-tier backup + AI opt-out
-   - [`data-residency`](./examples/data-residency) — region-locked OUs + SSL-required RCP + AI opt-out
+   - [`data-residency`](./examples/data-residency) — Region-locked OUs + SSL-required RCP + AI opt-out
 2. Customize the chosen example's `terraform.tfvars` in place (set `aws_region`, account IDs, OU names, etc.)
 3. Run with `-var-file` pointing at it:
 
@@ -197,26 +202,26 @@ This is a root deployment that does not consume external modules — all resourc
 | Name                              | Description                                                                                                        | Type           | Default       | Required |
 | --------------------------------- | ------------------------------------------------------------------------------------------------------------------ | -------------- | ------------- | -------- |
 | `tags`                            | Tags applied to all resources                                                                                      | `map(string)`  | —             | yes      |
-| `aws_region`                      | AWS region — should match your Control Tower home region                                                           | `string`       | `"us-east-1"` | no       |
+| `aws_region`                      | AWS Region — should match your AWS Control Tower home Region                                                           | `string`       | `"us-east-1"` | no       |
 | `organization`                    | OU hierarchy — name, key, ct_register per OU (up to 5 levels)                                                      | `object`       | `{}`          | no       |
-| `scp_policies`                    | Service Control Policies — file path (.json/.tpl), template vars, description, target OU keys                      | `map(object)`  | `{}`          | no       |
-| `rcp_policies`                    | Resource Control Policies — file path (.json/.tpl), template vars, description, target OU keys                     | `map(object)`  | `{}`          | no       |
+| `scp_policies`                    | Service control policies — file path (.json/.tpl), template vars, description, target OU keys                      | `map(object)`  | `{}`          | no       |
+| `rcp_policies`                    | Resource control policies — file path (.json/.tpl), template vars, description, target OU keys                     | `map(object)`  | `{}`          | no       |
 | `tagging_policies`                | Tag policies — file path (.json/.tpl), template vars, description, target OU keys                                  | `map(object)`  | `{}`          | no       |
-| `backup_policies`                 | AWS Backup org policies — file path (.json/.tpl), template vars, description, target OU keys                       | `map(object)`  | `{}`          | no       |
-| `ai_opt_out_policies`             | AI services opt-out policies — file path (.json/.tpl), template vars, description, targets (`"root"` for org-wide) | `map(object)`  | `{}`          | no       |
-| `chatbot_policies`                | Chatbot restriction policies — file path (.json/.tpl), template vars, description, targets (`"root"` for org-wide) | `map(object)`  | `{}`          | no       |
-| `ct_controls`                     | CT control assignments — control name to target OU key (OUs only, never the root)                                  | `list(object)` | `[]`          | no       |
-| `ct_baseline_version`             | CT baseline version — must match deployed Landing Zone version                                                     | `string`       | `"5.0"`       | no       |
-| `ct_identity_center_baseline_arn` | Identity Center baseline ARN — required when IC is enabled                                                         | `string`       | `""`          | no       |
-| `enable_ram_sharing`              | Allow cross-account resource sharing within the org via RAM                                                        | `bool`         | `false`       | no       |
+| `backup_policies`                 | Backup policies — file path (.json/.tpl), template vars, description, target OU keys                       | `map(object)`  | `{}`          | no       |
+| `ai_opt_out_policies`             | AI services opt-out policies — file path (.json/.tpl), template vars, description, targets (`"root"` for organization-wide) | `map(object)`  | `{}`          | no       |
+| `chatbot_policies`                | Chat applications policies — file path (.json/.tpl), template vars, description, targets (`"root"` for organization-wide) | `map(object)`  | `{}`          | no       |
+| `ct_controls`                     | AWS Control Tower control assignments — control name to target OU key (OUs only, never the root)                                  | `list(object)` | `[]`          | no       |
+| `ct_baseline_version`             | AWS Control Tower baseline version — must be compatible with your landing zone version                             | `string`       | `"5.0"`       | no       |
+| `ct_identity_center_baseline_arn` | AWS IAM Identity Center baseline ARN — required when you enable IAM Identity Center                                 | `string`       | `""`          | no       |
+| `enable_ram_sharing`              | Allow cross-account resource sharing within the organization through AWS RAM                                       | `bool`         | `false`       | no       |
 | `enable_delegation`               | Delegate AWS service admin to member accounts (15 services)                                                        | `object`       | `{}`          | no       |
 
 ## Outputs
 
 | Name                  | Description                                          |
 | --------------------- | ---------------------------------------------------- |
-| organization_id       | AWS Organization ID                                  |
-| organization_arn      | AWS Organization ARN                                 |
+| organization_id       | Organization ID                                      |
+| organization_arn      | Organization ARN                                     |
 | management_account_id | Management account ID                                |
 | organizational_units  | Map of all OUs — key => { id, arn, name, parent_id } |
 
@@ -227,14 +232,14 @@ Every policy `targets` entry and every `ct_controls` target is resolved the same
 | You write           | Resolves to                                                              |
 | ------------------- | ------------------------------------------------------------------------ |
 | An OU `key`         | An OU created by this configuration — wins over a same-named existing OU |
-| An existing OU name | An OU already directly under the root, e.g. Control Tower's `Security`   |
+| An existing OU name | An OU already directly under the root, for example the AWS Control Tower `Security`   |
 | `"root"`            | The organization root — policies only, not `ct_controls`                 |
 
 `locals.tf` builds two merged lookup maps, both keyed lowercase, and the key spaces above are merged in that order so later entries win:
 
 | Map                   | Value              | Used by                            |
 | --------------------- | ------------------ | ---------------------------------- |
-| `policy_target_ids`   | OU or root **ID**  | All six policy attachment types    |
+| `policy_target_ids`   | OU or root **ID**  | All six managed policy types       |
 | `control_target_arns` | OU **ARN**         | `aws_controltower_control`         |
 
 Because both the map keys and the lookup are lowercased, casing in tfvars does not matter — `Security`, `security` and `SECURITY` are equivalent. An unresolvable target fails its `lifecycle.precondition` at plan time with a message naming both the policy and the offending target string, rather than the null-argument error a bare `coalesce` would produce.
@@ -288,13 +293,13 @@ Nothing here relies on an apply failing to catch a bad input. Four classes of er
 }
 ```
 
-> See [`policies/README.md`](./policies/README.md) for the full catalog of pre-built policies across all six policy types (SCP, RCP, Tag, Backup, AI opt-out, Chatbot).
+> See [`policies/README.md`](./policies/README.md) for the full catalog of pre-built policies across the six managed policy types (service control, resource control, tag, backup, AI services opt-out, and chat applications).
 
-All six policy types resolve their document the same way: a `.json` path is read verbatim, a `.json.tpl` path is rendered with `templatefile` using that policy's `vars` map. Rendered size is checked against the AWS per-type limit at plan time.
+All six managed policy types resolve their document the same way: a `.json` path is read verbatim, a `.json.tpl` path is rendered with `templatefile` using that policy's `vars` map. Rendered size is checked against the AWS per-type limit at plan time.
 
 **Attach/Detach** — Add or remove targets from the `targets` list; see [Addressing targets](#addressing-targets).
 
-### Tag Policies
+### Tag policies
 
 **Add** — Create `.json` or `.json.tpl` in `policies/tag-policy/`, then add to `tagging_policies`:
 
@@ -337,25 +342,25 @@ RCPs complement SCPs — SCPs restrict IAM principals in your accounts; RCPs res
 }
 ```
 
-### AI Services Opt-Out
+### AI services opt-out policies
 
-**Add** — Create `.json` or `.json.tpl` in `policies/ai-opt-out/`, then add to `ai_opt_out_policies`. Typically attached to `"root"` for org-wide opt-out:
+**Add** — Create `.json` or `.json.tpl` in `policies/ai-opt-out/`, then add to `ai_opt_out_policies`. Typically attached to `"root"` for organization-wide opt-out:
 
 ```hcl
 "ai-opt-out-all" = {
-  description = "Opt out of AWS using org content for AI/ML service improvement"
+  description = "Opt out of AWS using organization content for AI/ML service improvement"
   path        = "policies/ai-opt-out/ai-opt-out-all.json"
   targets     = ["root"]
 }
 ```
 
-### Chatbot Policies
+### Chat applications policies
 
 **Add** — Create `.json` or `.json.tpl` in `policies/chatbot/`, then add to `chatbot_policies`:
 
 ```hcl
 "chatbot-approved-workspaces" = {
-  description = "Only allow Chatbot integrations with approved Slack workspaces and Teams"
+  description = "Allow only approved Slack workspaces and Microsoft Teams teams"
   path        = "policies/chatbot/chatbot-restrict-to-approved-workspaces.json.tpl"
   vars = {
     slack_workspace_ids = "[\"T0123456789\"]"
@@ -365,7 +370,7 @@ RCPs complement SCPs — SCPs restrict IAM principals in your accounts; RCPs res
 }
 ```
 
-### CT Controls
+### AWS Control Tower controls
 
 **Enable** — Add entries to `ct_controls` in your example's tfvars:
 
@@ -377,7 +382,7 @@ ct_controls = [
 ]
 ```
 
-Control names are mapped to global IDs in `ct_controls_definition.tf`. A name missing from that map is rejected at plan time with the offending name, so add it from the [global identifiers reference](https://docs.aws.amazon.com/controltower/latest/controlreference/all-global-identifiers.html) before use. Controls attach to OUs only — including Control Tower's own `Security` and `Sandbox` — and never to the root.
+`ct_controls_definition.tf` maps control names to global identifiers. Terraform rejects a name that is missing from that map at plan time and reports the name. Get the control's global identifier from AWS Control Catalog, for example with `aws controlcatalog list-controls`, and add it to the map before use. For the identifier format, see [Resource identifiers for APIs and controls](https://docs.aws.amazon.com/controltower/latest/controlreference/control-identifiers.html). Controls attach to OUs only — including the AWS Control Tower `Security` and `Sandbox` — and never to the root.
 
 ### Service Delegation
 
@@ -392,38 +397,38 @@ enable_delegation = {
 }
 ```
 
-Supported services: Access Analyzer, Backup, CloudTrail, Config, Detective, Firewall Manager, GuardDuty, Inspector, IPAM, Macie, Organizations, SecurityHub, SSO, StackSets, Systems Manager.
+Supported services, by configuration key: `access_analyzer` (IAM Access Analyzer), `backup` (AWS Backup), `cloudtrail` (AWS CloudTrail), `config` (AWS Config), `detective` (Amazon Detective), `firewall_manager` (AWS Firewall Manager), `guardduty` (Amazon GuardDuty), `inspector` (Amazon Inspector), `ipam` (Amazon VPC IP Address Manager), `macie` (Amazon Macie), `organizations` (AWS Organizations), `securityhub` (AWS Security Hub CSPM), `sso` (AWS IAM Identity Center), `stacksets` (AWS CloudFormation StackSets), `systems_manager` (AWS Systems Manager).
 
 > **Note:** Setting `macie` also enables Amazon Macie in the management account (`aws_macie2_account`), which AWS requires before a delegated administrator can be designated. Removing the `macie` entry later disables it again.
 
 ## File Structure
 
 ```
-├── main.tf                      # OUs (5 levels), CT baseline registration, RAM sharing
+├── main.tf                      # OUs (5 levels), AWS Control Tower baseline registration, AWS RAM sharing
 ├── locals.tf                    # OU flattening, SCP rendering, attachment maps
 ├── variables.tf                 # All inputs
-├── outputs.tf                   # Org + OU outputs
-├── data.tf                      # Org + region data sources
+├── outputs.tf                   # Organization + OU outputs
+├── data.tf                      # Organization + Region data sources
 ├── versions.tf                  # Provider + version constraints
-├── policies.tf                  # SCP + RCP + Tag + Backup + AI opt-out + Chatbot policy resources
+├── policies.tf                  # SCP + RCP + tag + backup + AI services opt-out + chat applications policy resources
 ├── delegation.tf                # Service delegations
-├── control_tower.tf             # CT controls
-├── ct_controls_definition.tf    # CT control ID mapping
+├── control_tower.tf             # AWS Control Tower controls
+├── ct_controls_definition.tf    # AWS Control Tower control identifier mapping
 ├── .gitlab-ci.yml               # Validation + security scanning (scan-only, no AWS access)
 ├── docs/diagrams/               # Architecture diagrams, rendered SVG and PNG
 ├── examples/                    # Use-case-specific tfvars — pass via -var-file
 │   ├── minimal/                 # OU hierarchy only
 │   ├── standard/                # SCP + RCP + tag policies + daily backup
-│   ├── enterprise/              # All six policy types, 15 delegations, broad CT controls
+│   ├── enterprise/              # All six managed policy types, 15 delegations, broad AWS Control Tower controls
 │   ├── regulated-workload/      # Strict encryption/MFA/audit + RCP + critical-tier backup + AI opt-out
 │   └── data-residency/          # Region-locked OUs + SSL-required RCP + AI opt-out
 └── policies/
-    ├── scp/                     # Service Control Policy files (.json / .json.tpl)
-    ├── rcp/                     # Resource Control Policy files
+    ├── scp/                     # Service control policy files (.json / .json.tpl)
+    ├── rcp/                     # Resource control policy files
     ├── tag-policy/              # Tag policy JSON files
     ├── backup/                  # Backup policy files
     ├── ai-opt-out/              # AI services opt-out policy files
-    └── chatbot/                 # Chatbot policy files
+    └── chatbot/                 # Chat applications policy files
 ```
 
 ## Limits
@@ -431,17 +436,17 @@ Supported services: Access Analyzer, Backup, CloudTrail, Config, Detective, Fire
 | Limit                      | Value                                                                  |
 | -------------------------- | ---------------------------------------------------------------------- |
 | OU nesting                 | 5 levels                                                               |
-| Policies per OU (per type) | 5 (including `FullAWSAccess`/`FullAWSResourceAccess` where applicable) |
-| SCP size                   | 10 240 characters                                                      |
-| RCP size                   | 5120 characters                                                        |
-| Tag policy size            | 10 000 characters                                                      |
-| Backup policy size         | 10 000 characters                                                      |
-| Chatbot policy size        | 10 000 characters                                                      |
-| AI opt-out policy size     | 2500 characters                                                        |
-| Policy types total per org | SCP, RCP, Tag, Backup, AI opt-out, Chatbot, plus others                |
-| Delegated admin accounts   | Per-service limits apply (most allow 1 per org)                        |
+| Policies attached per OU   | SCP 10, RCP 5, tag 10, backup 10, chat applications 5, AI services opt-out 5. SCP counts include `FullAWSAccess`; RCP counts include `RCPFullAWSAccess`, which you cannot detach |
+| SCP size                   | 10,240 characters                                                      |
+| RCP size                   | 5,120 characters                                                       |
+| Tag policy size            | 10,000 characters                                                      |
+| Backup policy size         | 10,000 characters                                                      |
+| Chat applications policy size | 10,000 characters                                                      |
+| AI services opt-out policy size | 2,500 characters                                                      |
+| Policy types in AWS Organizations | This sample manages six (service control, resource control, tag, backup, AI services opt-out, chat applications); AWS Organizations offers more |
+| Delegated admin accounts   | Per-service limits apply (most allow 1 per organization)               |
 
-Each size limit above is enforced as a plan-time precondition. Terraform submits the document exactly as rendered, so — unlike the console — no whitespace is stripped before the limit is applied.
+Each size limit above is enforced as a plan-time precondition. Terraform submits the document exactly as rendered, so, unlike the console, Terraform does not strip whitespace before AWS applies the limit.
 
 See [AWS Organizations quotas](https://docs.aws.amazon.com/organizations/latest/userguide/orgs_reference_limits.html) for the authoritative list.
 

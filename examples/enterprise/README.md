@@ -5,7 +5,7 @@ All features enabled — suitable for large organizations with mature security p
 ## When to Use
 
 - You have dedicated accounts for Security Tooling, Network, Identity, Automation, and Infrastructure
-- You want every CT control, every delegation, and full tag governance
+- You want every AWS Control Tower control, every delegation, and full tag governance
 - You're ready to manage 10+ accounts across multiple environments
 
 ## What Gets Created
@@ -33,10 +33,10 @@ Plus:
 - **SCP** `scp-foundation-guardrails` on all custom OUs
 - **RCP** `rcp-require-ssl` + `rcp-confused-deputy-protection` on `workloads` and `data`
 - **Backup policy** `backup-critical-daily-weekly` on `workloads` and `data` (daily + weekly + DR copy)
-- **AI opt-out** attached at the root — opts the whole org out of AI service content use
-- **Chatbot policy** at the root — only approved Slack workspaces and Teams allowed
+- **AI opt-out** attached at the root — opts the whole organization out of AI service content use
+- **Chat applications policy** at the root — only approved Slack workspaces and Teams allowed
 - **Tag policies** mandatory + recommended on all custom OUs
-- **CT controls** for encryption, network, S3, logging, and IAM across Workloads
+- **AWS Control Tower controls** for encryption, network, S3, logging, and IAM across Workloads
 - **All 15 service delegations** pointing to purpose-specific member accounts
 - **RAM sharing** enabled organization-wide
 - **Identity Center baseline** configured
