@@ -1,11 +1,11 @@
 # Minimal Example
 
-Lay down an OU hierarchy on top of Control Tower — nothing else.
+Lay down an OU hierarchy on top of AWS Control Tower — nothing else.
 
 ## When to Use
 
 - First-time setup. You just want your OU structure in place.
-- You plan to add SCPs, tag policies, CT controls, and delegations later, one at a time.
+- You plan to add SCPs, tag policies, AWS Control Tower controls, and delegations later, one at a time.
 - You want to see what the bare minimum config looks like.
 
 ## What Gets Created
@@ -18,7 +18,7 @@ Root
 └── Workloads       ← created
 ```
 
-Both new OUs are registered with the Control Tower baseline.
+Both new OUs are registered with the AWS Control Tower baseline.
 
 ## Next Steps
 
@@ -26,7 +26,7 @@ Once this applies cleanly:
 
 1. Add SCPs — start with `scp-foundation-guardrails` (see `standard` example)
 2. Add tag policies (see `standard` example)
-3. Enable CT controls for your Workloads OU (see `enterprise` example for the common set)
+3. Enable AWS Control Tower controls for your Workloads OU (see `enterprise` example for the common set)
 4. Delegate security services to a central account (see `enterprise` or `regulated-workload`)
 
 ## Apply

@@ -25,8 +25,8 @@ This is sample code with no versioned releases. Fixes are made on the `main` bra
 
 | Finding | Why it is intentional |
 | --- | --- |
-| `"Resource": "*"` in service control and resource control policy documents | A guardrail has to cover every resource the denied action can reach. Scope comes from the OU the policy is attached to and from each statement's `Condition` element, not from resource ARNs. |
-| Service-wide action wildcards such as `ce:*` in deny statements | A deny guardrail that lists individual actions leaves gaps whenever a service adds an action. Denying the service namespace is the reliable form. |
+| `"Resource": "*"` in service control and resource control policy documents | A deny policy has to cover every resource the denied action can reach. Scope comes from the OU the policy is attached to and from each statement's `Condition` element, not from resource ARNs. |
+| Service-wide action wildcards such as `ce:*` in deny statements | A deny statement that lists individual actions leaves gaps whenever a service adds an action. Denying the service namespace is the reliable form. |
 | No `.terraform.lock.hcl` in the repository | Sample code consumers are expected to manage their own lock file. See above. |
 
 This is sample code, for non-production usage. You should work with your security and legal teams to meet your organizational security, regulatory and compliance requirements before deployment.
