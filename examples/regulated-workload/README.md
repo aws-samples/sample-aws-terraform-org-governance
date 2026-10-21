@@ -5,7 +5,7 @@ Strict controls suitable for financial services, healthcare, or other regulated 
 ## When to Use
 
 - You have compliance obligations (PCI-DSS, HIPAA, SOC 2, ISO 27001)
-- You need comprehensive encryption, MFA, and audit trail integrity enforcement
+- You need encryption, MFA and audit-trail compliance reported across a regulated OU, with preventive SCPs layered on top
 - You have a dedicated Security Tooling account for central security service delegation
 
 ## What Gets Created
@@ -27,11 +27,14 @@ Plus:
 - **AI opt-out** at the root — prevents AWS from using regulated content for AI/ML training
 - **Tag policy** mandatory enforcing Environment/Team/CostCenter/ManagedBy
 - **AWS Control Tower controls** — comprehensive set covering:
-  - Encryption (EBS, RDS, S3 audit bucket)
-  - Network isolation (no public IPs, restricted ports, VPC public access blocked)
-  - Data protection (S3 public prohibited, versioning, snapshot public blocked)
-  - Identity (root user restricted, MFA required everywhere)
-  - Audit trail (detective check that member accounts have AWS CloudTrail enabled)
+  - Preventive: root user actions and root access key creation are denied, and changes to Amazon S3 bucket encryption are denied
+  - Detective: encryption is reported for Amazon EBS volumes and Amazon RDS storage
+  - Detective: public IP addresses, unrestricted SSH and unrestricted common ports are reported
+  - Detective: public Amazon S3 buckets, missing bucket versioning, and public Amazon RDS and Amazon EBS snapshots are reported
+  - Detective: MFA is reported for the root user and for IAM users
+  - Detective: member accounts without AWS CloudTrail enabled are reported
+
+  Three of these controls are preventive. The other 16 are detective: they evaluate resources with AWS Config rules and report violations on the AWS Control Tower dashboard. Pair them with the SCPs in `policies/scp/` if you need an action blocked rather than reported.
 - **Delegation** — all security services delegated to one Security Tooling account
 
 ## Key Customizations (Required)

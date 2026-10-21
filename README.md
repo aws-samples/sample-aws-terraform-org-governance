@@ -134,7 +134,7 @@ All four figures use the official AWS Architecture Icons and are rendered to SVG
    - [`minimal`](./examples/minimal) — OU hierarchy only, nothing else
    - [`standard`](./examples/standard) — SCP + RCP + tag policies + daily backup plan
    - [`enterprise`](./examples/enterprise) — all six managed policy types, 14 delegations, broad AWS Control Tower controls
-   - [`regulated-workload`](./examples/regulated-workload) — strict encryption/MFA/audit + RCP + critical-tier backup + AI opt-out
+   - [`regulated-workload`](./examples/regulated-workload) — encryption, MFA and audit reporting + RCP + critical-tier backup + AI opt-out
    - [`data-residency`](./examples/data-residency) — Region-locked OUs + SSL-required RCP + AI opt-out
 2. Customize the chosen example's `terraform.tfvars` in place (set `aws_region`, account IDs, OU names, etc.)
 3. Run with `-var-file` pointing at it:
@@ -251,7 +251,7 @@ OU `key` values must be unique across all five nesting levels — they are the m
 
 ## Plan-time guards
 
-Nothing here relies on an apply failing to catch a bad input. Four classes of error are rejected during `terraform plan`:
+Four classes of error are rejected during `terraform plan`, before any AWS API call. One class is not guarded:
 
 | Guard                | Where                                                          | What it catches                                                                            |
 | -------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
@@ -259,6 +259,7 @@ Nothing here relies on an apply failing to catch a bad input. Four classes of er
 | Policy document size | `lifecycle.precondition` on each `aws_organizations_policy.*`  | A rendered document over its per-type character limit                                       |
 | Unresolvable target  | `lifecycle.precondition` on each attachment and on the control | A target that is not an OU key, an existing OU name, or `root`                               |
 | Unknown control name | `validation` on `var.ct_controls`                              | A control name absent from the `ct_control_ids` map in `ct_controls_definition.tf`           |
+| Not guarded          | —                                                              | A control name in the map that has **mandatory** guidance. The control APIs enable only Strongly recommended and Elective controls, so it passes plan and fails during apply. See [Identifiers for legacy controls](https://docs.aws.amazon.com/controltower/latest/controlreference/identifiers-for-legacy-controls.html) |
 
 ## Common Operations
 
@@ -423,7 +424,7 @@ Supported services, by configuration key: `access_analyzer` (IAM Access Analyzer
 │   ├── minimal/                 # OU hierarchy only
 │   ├── standard/                # SCP + RCP + tag policies + daily backup
 │   ├── enterprise/              # All six managed policy types, 14 delegations, broad AWS Control Tower controls
-│   ├── regulated-workload/      # Strict encryption/MFA/audit + RCP + critical-tier backup + AI opt-out
+│   ├── regulated-workload/      # Encryption, MFA and audit reporting + RCP + critical-tier backup + AI opt-out
 │   └── data-residency/          # Region-locked OUs + SSL-required RCP + AI opt-out
 └── policies/
     ├── scp/                     # Service control policy files (.json / .json.tpl)

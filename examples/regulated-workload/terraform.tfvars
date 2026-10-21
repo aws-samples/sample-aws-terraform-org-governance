@@ -18,8 +18,8 @@
 # Key differences from standard:
 # - Region-locked by an SCP (only us-east-1 and us-west-2)
 # - Root user restrictions enforced by AWS Control Tower controls
-# - MFA required
-# - Full encryption enforced (EBS, RDS)
+# - MFA reported for the root user and IAM users (detective controls)
+# - Encryption reported for Amazon EBS and Amazon RDS (detective controls)
 # - Detective check that member accounts have AWS CloudTrail enabled
 # - RCP: require SSL + confused-deputy protection (blocks external principals)
 # - Backup: daily + weekly with cross-Region DR copy for BackupTier=critical

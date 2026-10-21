@@ -26,8 +26,10 @@ Plus:
   - VPC internet access blocked
   - VPN connections blocked
   - S3 cross-Region replication restricted
-  - Public IPs prohibited (Amazon RDS, Amazon EC2, AWS Lambda, Amazon OpenSearch Service, Amazon SageMaker AI)
-  - IGW routes unrestricted blocked
+  - Public access reported (Amazon RDS, Amazon EC2, AWS Lambda, Amazon OpenSearch Service, Amazon SageMaker AI)
+  - Unrestricted internet gateway routes reported
+
+  The cross-Region, VPC internet access, VPN and replication controls are preventive. The public-access and internet gateway controls are detective: they report rather than block.
 - **Tag policy** mandatory
 
 ## Key Customizations

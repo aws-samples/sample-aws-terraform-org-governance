@@ -7,7 +7,7 @@ Each folder contains a `terraform.tfvars` tuned for a specific use case. Customi
 | [minimal](./minimal)                       | First-time setup. OU hierarchy only, no policies or delegations.                                                |
 | [standard](./standard)                     | Growing company. SCP + RCP + tag policies + daily backup plan.                                                  |
 | [enterprise](./enterprise)                 | Large organization. Six managed policy types (SCP, RCP, tag, backup, AI services opt-out, chat applications), 14 service delegations, broad AWS Control Tower controls. |
-| [regulated-workload](./regulated-workload) | Finance/healthcare. Strict encryption, MFA, audit integrity + RCP, critical-tier backup, AI opt-out.            |
+| [regulated-workload](./regulated-workload) | Finance/healthcare. Encryption, MFA and audit compliance reporting + RCP, critical-tier backup, AI opt-out.            |
 | [data-residency](./data-residency)         | GDPR / data sovereignty. Region-locked OUs, SSL-required RCP, AI opt-out for privacy.                           |
 
 ## How to Use
