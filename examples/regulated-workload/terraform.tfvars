@@ -1,7 +1,7 @@
 # Regulated Workload Example — Strict controls for regulated industries
 #
 # Use case: Financial services, healthcare, or other regulated workloads
-# requiring strict control over regions, encryption, MFA, and auditability.
+# requiring strict control over Regions, encryption, MFA, and auditability.
 #
 # Assumes you have a dedicated Security Tooling account for central
 # Amazon GuardDuty, AWS Security Hub CSPM, AWS Config, and AWS CloudTrail
@@ -16,13 +16,13 @@
 #       └── Development
 #
 # Key differences from standard:
-# - Region-locked via SCP (only us-east-1 and us-west-2)
-# - Root user restrictions enforced via AWS Control Tower controls
+# - Region-locked by an SCP (only us-east-1 and us-west-2)
+# - Root user restrictions enforced by AWS Control Tower controls
 # - MFA required
 # - Full encryption enforced (EBS, RDS)
 # - Detective check that member accounts have AWS CloudTrail enabled
 # - RCP: require SSL + confused-deputy protection (blocks external principals)
-# - Backup: daily + weekly with cross-region DR copy for BackupTier=critical
+# - Backup: daily + weekly with cross-Region DR copy for BackupTier=critical
 # - AI opt-out: prevent AWS from using content for AI/ML training (HIPAA/PCI)
 
 tags = {
@@ -55,7 +55,7 @@ organization = {
 
 scp_policies = {
   "scp-foundation-guardrails" = {
-    description = "Foundation: deny org leave, IMDSv2, encryption, RAM external sharing"
+    description = "Foundation: deny leaving the organization, require IMDSv2, require encryption, block external AWS RAM sharing"
     path        = "policies/scp/scp-foundation-guardrails.json.tpl"
     vars        = { breakglass_role = "BreakGlass-Admin" }
     targets     = ["regulated", "non-regulated"]

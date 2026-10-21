@@ -16,7 +16,7 @@ The following four figures each show something the others cannot:
 | ------ | ------- |
 | [Governance topology](#governance-topology) | What is deployed, and where each kind of governance lands |
 | [What each policy type bounds](#what-each-policy-type-bounds) | Why more than one policy type is needed |
-| [OU nesting and ordering](#ou-nesting-and-ordering) | How deep the hierarchy goes, and the one order AWS imposes |
+| [OU nesting and ordering](#ou-nesting-and-ordering) | How deep the hierarchy goes, and the baseline ordering AWS imposes |
 | [Delegated administration](#delegated-administration) | Every service whose administration can be delegated |
 
 ### Governance topology
@@ -52,13 +52,13 @@ Declaring an AWS Control Tower OU in `var.organization` would make Terraform try
 
 ![Service control policies bound principals; resource control policies bound resources, including access from outside the organization](docs/diagrams/org-policy-surfaces.svg)
 
-This is why the configuration manages more than one policy type. A **service control policy** bounds what principals *inside* a member account may do — it is the familiar preventive policy, and it has no effect on a caller outside the organization. A **resource control policy** bounds what may be done *to* the account's resources, so it reaches a principal that an SCP cannot evaluate. The remaining four types govern different dimensions again: tag policies enforce tag key casing and allowed values, backup policies apply AWS Backup plans, AI services opt-out policies keep your content out of AI/ML service improvement, and chat applications policies restrict which Slack workspaces and Microsoft Teams channels can reach your accounts.
+This is why the configuration manages more than one policy type. A **service control policy** bounds what principals *inside* a member account may do — it is the familiar preventive policy, and it has no effect on a caller outside the organization. A **resource control policy** bounds what may be done *to* the account's resources, so it reaches a principal that an SCP cannot evaluate. The remaining four types govern different dimensions again: tag policies enforce tag key casing and allowed values, backup policies apply AWS Backup plans, AI services opt-out policies keep your content out of AI/ML service improvement, and chat applications policies restrict which Slack workspaces and Microsoft Teams teams can reach your accounts.
 
 ### OU nesting and ordering
 
 ![One OU branch at maximum depth, with AWS Control Tower registering the baseline parent before child](docs/diagrams/org-ou-nesting.svg)
 
-The governance topology figure shows the OU tree as a flat row of siblings, which cannot show depth. AWS permits five levels beneath the root and the configuration implements exactly that. The figure also shows the one ordering AWS imposes and Terraform cannot infer, which the next section explains.
+The governance topology figure shows the OU tree as a flat row of siblings, which cannot show depth. AWS permits five levels beneath the root and the configuration implements exactly that. The figure also shows the baseline ordering that AWS imposes and Terraform cannot infer, one of the two explicit orderings that the next section explains.
 
 ### Apply ordering
 
@@ -97,11 +97,11 @@ All four figures use the official AWS Architecture Icons and are rendered to SVG
    - **RCPs** — resource control policies (deny statements on resources, including external principals)
    - **Tag policies** — enforce tag key casing and allowed values
    - **Backup policies** — organization-wide AWS Backup plans
-   - **AI Services Opt-Out** — prevent AWS from using content for AI/ML improvement
-   - **Chat applications policies** — restrict which Slack workspaces and Microsoft Teams channels can reach your accounts through Amazon Q Developer in chat applications
+   - **AI services opt-out policies** — prevent AWS from using content for AI and ML improvement
+   - **Chat applications policies** — restrict which Slack workspaces and Microsoft Teams teams can reach your accounts through Amazon Q Developer in chat applications
 
    AWS Organizations has more policy types, such as Amazon EC2 declarative policies, Security Hub policies, Amazon Inspector policies, Amazon Bedrock policies, Amazon S3 policies, Amazon GuardDuty policies, and upgrade rollout policies. This sample does not manage them.
-4. Enables AWS Control Tower controls on target OUs (legacy `AWS-GR_*` and proactive `CT.*`/`SH.*` controls)
+4. Enables AWS Control Tower controls on target OUs: legacy `AWS-GR_*` controls, proactive `CT.*.PR.*` and preventive `CT.*.PV.*` controls, and detective `SH.*` controls
 5. Delegates administration of 14 AWS services to designated member accounts
 6. Optionally enables organization-wide AWS RAM sharing
 7. Ships with a reusable policy template library and five scenario-based examples (minimal, standard, enterprise, regulated-workload, data-residency)
@@ -279,7 +279,7 @@ Nothing here relies on an apply failing to catch a bad input. Four classes of er
 
 **Remove** — Move all accounts out first, then remove the OU block.
 
-**Move** — AWS doesn't support moving OUs. Create new OU, move accounts via `aws organizations move-account`, remove old OU.
+**Move** — AWS does not support moving an OU. Create the new OU, move the accounts by running `aws organizations move-account`, then remove the old OU.
 
 **Import** — `terraform import 'aws_organizations_organizational_unit.level_1_ous["ou-key"]' ou-xxxx-xxxxxxxx`
 
@@ -314,7 +314,7 @@ All six managed policy types resolve their document the same way: a `.json` path
 }
 ```
 
-### RCPs (Resource Control Policies)
+### RCPs (resource control policies)
 
 **Add** — Create `.json` or `.json.tpl` in `policies/rcp/`, then add to `rcp_policies`:
 

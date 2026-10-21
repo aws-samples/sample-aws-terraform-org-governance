@@ -42,10 +42,10 @@ Plus:
 
 ## What's Intentionally Excluded
 
-- **No RAM sharing** — regulated workloads typically shouldn't share resources freely
+- **No RAM sharing** — regulated workloads typically should not share resources freely
 - **No mandatory AWS Control Tower controls** — AWS Control Tower already applies the mandatory controls that protect its AWS CloudTrail, AWS Config and log archive resources, and the control APIs cannot enable them on an OU
 - **No non-security delegations** — keeps AWS Backup, AWS Systems Manager, and Amazon VPC IPAM isolated from security tooling
-- **Non-Regulated OU doesn't get strict AWS Control Tower controls** — keep dev productive, only enforce on Regulated
+- **Non-Regulated OU does not get strict AWS Control Tower controls** — keep dev productive, only enforce on Regulated
 
 ## Apply
 

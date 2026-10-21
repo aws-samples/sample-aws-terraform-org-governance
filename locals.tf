@@ -6,8 +6,8 @@ locals {
   # Organization lookups
   ##############################################################################
 
-  # OUs that already exist directly under the root — chiefly Control Tower's
-  # Security and Sandbox. Keyed lowercase so targets are case-insensitive.
+  # OUs that already exist directly under the root — chiefly the Security and
+  # Sandbox OUs that AWS Control Tower creates. Keyed lowercase so targets are case-insensitive.
   current_units = {
     for ou in data.aws_organizations_organizational_units.current.children : lower(ou.name) => ou.id
   }
@@ -20,7 +20,7 @@ locals {
 
   # AWS Control Tower baseline ARN — constructed from the provider Region.
   # "17BSJV3IGJ2QSGA2" is the fixed global identifier for the built-in
-  # AWSControlTowerBaseline. It is stable across accounts and regions.
+  # AWSControlTowerBaseline. It is stable across accounts and Regions.
   # To confirm for your deployment, run:
   #   aws controltower list-baselines --query "baselines[?name=='AWSControlTowerBaseline']"
   ct_baseline_arn = "arn:aws:controltower:${data.aws_region.current.region}::baseline/17BSJV3IGJ2QSGA2"
@@ -301,7 +301,7 @@ locals {
   #
   # A policy `targets` entry or a ct_controls `target` may name an OU created
   # here (by its `key`), an OU that already exists under the root (by name,
-  # e.g. Control Tower's Security), or — for policies only — "root". Lookups
+  # such as the Security OU that AWS Control Tower creates), or — for policies only — "root". Lookups
   # are lowercased, so casing in tfvars does not matter. OU keys created here
   # win over same-named pre-existing OUs.
   ##############################################################################
@@ -312,7 +312,7 @@ locals {
     { root = local.root_ou },
   )
 
-  # Control Tower controls target an OU ARN and cannot target the root.
+  # AWS Control Tower controls target an OU ARN and cannot target the root.
   control_target_arns = merge(
     local.current_unit_arns,
     { for key, ou in local.all_ou_attributes : lower(key) => ou.arn },

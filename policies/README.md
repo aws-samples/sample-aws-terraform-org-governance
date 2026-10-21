@@ -1,17 +1,17 @@
-# Policies Reference Library
+# Policies reference library
 
-Catalog of reusable organization-level policy files. Attach them via the matching input variable in your tfvars.
+Catalog of reusable organization-level policy files. Attach them through the matching input variable in your tfvars.
 
 | Policy type             | Input variable        | Files live in          |
 | ----------------------- | --------------------- | ---------------------- |
-| Service Control Policy  | `scp_policies`        | `policies/scp/`        |
-| Resource Control Policy | `rcp_policies`        | `policies/rcp/`        |
-| Tag Policy              | `tagging_policies`    | `policies/tag-policy/` |
-| Backup Policy           | `backup_policies`     | `policies/backup/`     |
-| AI Services Opt-Out     | `ai_opt_out_policies` | `policies/ai-opt-out/` |
+| Service control policy  | `scp_policies`        | `policies/scp/`        |
+| Resource control policy | `rcp_policies`        | `policies/rcp/`        |
+| Tag policy              | `tagging_policies`    | `policies/tag-policy/` |
+| Backup policy           | `backup_policies`     | `policies/backup/`     |
+| AI services opt-out     | `ai_opt_out_policies` | `policies/ai-opt-out/` |
 | Chat applications policy | `chatbot_policies`   | `policies/chatbot/`    |
 
-## Service Control Policies (SCPs)
+## Service control policies (SCPs)
 
 Restrict what IAM principals in your organization's member accounts can do. Deny-only.
 
@@ -27,7 +27,7 @@ Restrict what IAM principals in your organization's member accounts can do. Deny
 | `scp/scp-protect-security-services.json.tpl` | Prevent disabling AWS CloudTrail, Amazon GuardDuty, AWS Config, and AWS Security Hub CSPM                       | `breakglass_role`                    |
 | `scp/scp-deny-expensive-services.json`       | Block expensive services (Amazon Redshift, Amazon EMR, Amazon SageMaker AI) and large instance families    | —                                    |
 
-## Resource Control Policies (RCPs)
+## Resource control policies (RCPs)
 
 Restrict what can be done _to resources in your accounts_, even by external principals and AWS services. Complements SCPs.
 
@@ -42,7 +42,7 @@ Restrict what can be done _to resources in your accounts_, even by external prin
 > aws organizations enable-policy-type --root-id r-xxxx --policy-type RESOURCE_CONTROL_POLICY
 > ```
 
-## Tag Policies
+## Tag policies
 
 Enforce tag key casing and allowed values. Tag policies do not block actions — pair with `scp-require-tags-on-create` to enforce presence.
 
@@ -53,7 +53,7 @@ Enforce tag key casing and allowed values. Tag policies do not block actions —
 | `tag-policy/tag-policy-data-classification.json` | Enforce DataClassification on S3/RDS/DynamoDB/Secrets               |
 | `tag-policy/tag-policy-cost-allocation.json`     | Project, Application, Environment, BusinessUnit for cost reporting  |
 
-## Backup Policies
+## Backup policies
 
 Organization-wide AWS Backup plans attached to OUs. Every account in the target OU inherits the plan.
 
@@ -70,14 +70,14 @@ Organization-wide AWS Backup plans attached to OUs. Every account in the target 
 > aws organizations enable-policy-type --root-id r-xxxx --policy-type BACKUP_POLICY
 > ```
 
-## AI Services Opt-Out Policies
+## AI services opt-out policies
 
-Control whether AWS can use your content (images, audio, text) to improve AI/ML services. Essential for GDPR, HIPAA, and privacy-sensitive orgs.
+Control whether AWS can use your content (images, audio, text) to improve AI and ML services. Essential for GDPR, HIPAA, and privacy-sensitive organizations.
 
 | File                                   | Purpose                                                                                     |
 | -------------------------------------- | ------------------------------------------------------------------------------------------- |
-| `ai-opt-out/ai-opt-out-all.json`       | Opt out of ALL AWS AI services globally                                                     |
-| `ai-opt-out/ai-opt-out-selective.json` | Opt out of specific services (Rekognition, Comprehend, Transcribe, etc.), opt into the rest |
+| `ai-opt-out/ai-opt-out-all.json`       | Opt out of all AWS AI services globally                                                     |
+| `ai-opt-out/ai-opt-out-selective.json` | Opt out of specific services (Amazon Rekognition, Amazon Comprehend, Amazon Transcribe, and others), opt into the rest |
 
 > Requires `AISERVICES_OPT_OUT_POLICY` to be enabled on your organization root:
 >
@@ -87,7 +87,7 @@ Control whether AWS can use your content (images, audio, text) to improve AI/ML 
 
 ## Chat applications policies
 
-Restrict which Slack workspaces and Microsoft Teams channels can interact with AWS through Amazon Q Developer in chat applications. Prevents unauthorized ChatOps.
+Restrict which Slack workspaces and Microsoft Teams teams can interact with AWS through Amazon Q Developer in chat applications. Prevents unauthorized ChatOps.
 
 | File                                                       | Purpose                                                    | Template Vars                           |
 | ---------------------------------------------------------- | ---------------------------------------------------------- | --------------------------------------- |
@@ -101,12 +101,12 @@ Restrict which Slack workspaces and Microsoft Teams channels can interact with A
 
 ## Using a templated policy (`.tpl`)
 
-Pass template variables via `vars`:
+Pass template variables through `vars`:
 
 ```hcl
 scp_policies = {
   "scp-region-restriction" = {
-    description = "Limit to approved regions"
+    description = "Limit to approved Regions"
     path        = "policies/scp/scp-region-restriction.json.tpl"
     vars = {
       allowed_regions = "\"us-east-1\",\"us-west-2\",\"eu-west-1\""
@@ -132,23 +132,23 @@ rcp_policies = {
 }
 ```
 
-## Break-Glass Role Pattern
+## Break-glass role pattern
 
 Most templated policies exclude a `breakglass_role` so you can recover if the policy locks you out.
 
-- Create the role in every account via CloudFormation StackSet from the management account
+- Create the role in every account by using an AWS CloudFormation StackSet from the management account
 - Protect the role name with an IAM policy so it can't be renamed or deleted by workloads
 - Restrict assumption to the management account + MFA required
-- Monitor all assumptions via CloudTrail alerts
+- Monitor all assumptions through AWS CloudTrail alerts
 
-## Authoring Tips
+## Authoring tips
 
 - **Stay under the per-type limit after rendering**: 10,240 characters for an SCP and 5,120 for an RCP. The sample code enforces this as a plan-time precondition.
 - **Always test in a sandbox OU first.** Policies apply immediately to all accounts.
-- **Use `NotAction` sparingly** — over-denying is the #1 cause of lockout.
+- **Use `NotAction` sparingly** — over-denying is the most common cause of lockout.
 - **Use IAM Access Analyzer policy validation** on rendered JSON before committing.
 - **Attach `breakglass_role` exclusions** on any deny policy you might need to disable in an emergency.
-- **Version policies via git** — the effective policy is the rendered one, not the template. Commit both to make drift detection possible.
+- **Version policies by using Git** — the effective policy is the rendered one, not the template. Commit both to make drift detection possible.
 
 ## References
 

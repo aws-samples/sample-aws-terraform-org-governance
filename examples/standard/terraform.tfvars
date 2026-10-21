@@ -2,7 +2,7 @@
 #
 # Use case: A growing company that wants foundational guardrails,
 # tag governance, and a sensible OU hierarchy. No service delegation
-# or AWS Control Tower controls yet — add those as the org matures.
+# or AWS Control Tower controls yet — add those as the organization matures.
 #
 # What this sets up:
 #   Root
@@ -64,7 +64,7 @@ organization = {
 
 scp_policies = {
   "scp-foundation-guardrails" = {
-    description = "Foundation: deny org leave, IMDSv2, encryption, RAM external sharing"
+    description = "Foundation: deny leaving the organization, require IMDSv2, require encryption, block external AWS RAM sharing"
     path        = "policies/scp/scp-foundation-guardrails.json.tpl"
     vars        = { breakglass_role = "BreakGlass-Admin" }
     targets     = ["infrastructure", "workloads"]

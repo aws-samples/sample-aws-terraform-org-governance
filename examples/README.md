@@ -25,7 +25,7 @@ terraform apply -var-file=examples/standard/terraform.tfvars
 Each example is a starting point. Typical edits:
 
 - Swap placeholder account IDs (`111111111111`, etc.) for your real account IDs
-- Set `ct_identity_center_baseline_arn` if you use Identity Center (run `aws controltower list-enabled-baselines` to get it)
+- Set `ct_identity_center_baseline_arn` if you use AWS IAM Identity Center. To get the ARN, run `aws controltower list-enabled-baselines`.
 - Rename OU keys to match your naming convention
 - Add/remove `ct_controls` entries based on your compliance needs
 - Adjust the `breakglass_role` name in `scp_policies` vars to match your break-glass IAM role

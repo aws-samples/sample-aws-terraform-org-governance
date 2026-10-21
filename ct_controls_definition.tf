@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT-0
 
 # Taken from https://docs.aws.amazon.com/controltower/latest/controlreference/all-global-identifiers.html
-# The old approach (i.e. passing the control name) is considered legacy, now global IDs are the recommended way
+# The older approach, which passes the control name, is now legacy. Global identifiers are the recommended way.
 # https://docs.aws.amazon.com/controltower/latest/controlreference/identifiers-for-legacy-controls.html
 # Update this map if you cannot find new controls
 

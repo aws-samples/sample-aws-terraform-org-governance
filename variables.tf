@@ -6,7 +6,7 @@
 ################################################################################
 
 variable "tags" {
-  description = "Tags applied to all resources created by this deployment via provider default_tags"
+  description = "Tags applied to all resources created by this deployment through the provider's default_tags"
   type        = map(string)
 }
 
@@ -17,7 +17,7 @@ variable "aws_region" {
 
   validation {
     condition     = can(regex("^[a-z]{2}-[a-z]+-[0-9]$", var.aws_region))
-    error_message = "aws_region must be a valid AWS region (e.g., us-east-1, eu-west-2)."
+    error_message = "aws_region must be a valid AWS Region, for example us-east-1 or eu-west-2."
   }
 }
 
@@ -58,7 +58,7 @@ variable "organization" {
 }
 
 ################################################################################
-# Control Tower
+# AWS Control Tower
 ################################################################################
 
 variable "ct_baseline_version" {
@@ -73,7 +73,7 @@ variable "ct_baseline_version" {
 }
 
 variable "ct_identity_center_baseline_arn" {
-  description = "ARN of enabled IdentityCenterBaseline. Leave empty if not using Identity Center."
+  description = "ARN of an enabled IdentityCenterBaseline. Leave this empty if you do not use AWS IAM Identity Center."
   type        = string
   default     = ""
 
@@ -118,11 +118,11 @@ variable "scp_policies" {
 }
 
 ################################################################################
-# Resource Control Policies (RCPs)
+# Resource control policies (RCPs)
 ################################################################################
 
 variable "rcp_policies" {
-  description = "Resource Control Policies (RCPs). RCPs restrict what resources can be accessed, even by external principals. Complements SCPs."
+  description = "Resource control policies (RCPs). RCPs restrict what resources can be accessed, even by external principals. Complements SCPs."
   type = map(object({
     description = string
     path        = string
@@ -152,7 +152,7 @@ variable "tagging_policies" {
 ################################################################################
 
 variable "backup_policies" {
-  description = "AWS Backup policies — org-wide backup plans applied to target OUs."
+  description = "AWS Backup policies — organization-wide backup plans applied to target OUs."
   type = map(object({
     description = string
     path        = string
@@ -163,11 +163,11 @@ variable "backup_policies" {
 }
 
 ################################################################################
-# AI Services Opt-Out Policies
+# AI services opt-out policies
 ################################################################################
 
 variable "ai_opt_out_policies" {
-  description = "AI Services opt-out policies — prevent AWS AI services from using your content for model improvement."
+  description = "AI services opt-out policies — prevent AWS AI services from using your content for model improvement."
   type = map(object({
     description = string
     path        = string
@@ -182,7 +182,7 @@ variable "ai_opt_out_policies" {
 ################################################################################
 
 variable "chatbot_policies" {
-  description = "Chat applications policies — restrict which Slack workspaces and Microsoft Teams channels can reach your accounts through Amazon Q Developer in chat applications."
+  description = "Chat applications policies — restrict which Slack workspaces and Microsoft Teams teams can reach your accounts through Amazon Q Developer in chat applications."
   type = map(object({
     description = string
     path        = string
@@ -197,7 +197,7 @@ variable "chatbot_policies" {
 ################################################################################
 
 variable "enable_ram_sharing" {
-  description = "Allow cross-account resource sharing via RAM across the org"
+  description = "Allow cross-account resource sharing within the organization through AWS Resource Access Manager (AWS RAM)"
   type        = bool
   default     = false
 }

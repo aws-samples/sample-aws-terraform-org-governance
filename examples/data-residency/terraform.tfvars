@@ -1,18 +1,19 @@
 # Data Residency Example — Region-locked workloads
 #
 # Use case: Data sovereignty requirements (GDPR, SOC 2, country-specific
-# regulations) that mandate data must stay within approved regions.
+# regulations) that mandate data must stay within approved Regions.
 #
 # What this sets up:
 #   Root
 #   ├── EU-Workloads     (locked to eu-west-1, eu-central-1)
 #   └── US-Workloads     (locked to us-east-1, us-west-2)
 #
-# Data residency is enforced via the AWS Control Tower Region deny control plus
-# data-residency specific controls that prevent cross-region networking
-# and public access.
+# Data residency is enforced by the data-residency AWS Control Tower controls in
+# this configuration, which prevent cross-Region networking and public access.
+# Add the AWS Control Tower Region deny control and a Region restriction SCP as
+# well; see this example's README.
 #
-# Additional org-level controls:
+# Additional organization-level controls:
 # - RCP: require SSL on data services (applies to external principals too)
 # - AI opt-out: prevent AWS from processing sovereign data for AI/ML training
 
@@ -39,7 +40,7 @@ organization = {
 
 scp_policies = {
   "scp-foundation-guardrails" = {
-    description = "Foundation: deny org leave, IMDSv2, encryption, RAM external sharing"
+    description = "Foundation: deny leaving the organization, require IMDSv2, require encryption, block external AWS RAM sharing"
     path        = "policies/scp/scp-foundation-guardrails.json.tpl"
     vars        = { breakglass_role = "BreakGlass-Admin" }
     targets     = ["eu-workloads", "us-workloads"]
@@ -57,7 +58,7 @@ rcp_policies = {
 
 ai_opt_out_policies = {
   "ai-opt-out-all" = {
-    description = "Opt out of AWS using org content for AI/ML training — required for GDPR"
+    description = "Opt out of AWS using organization content for AI and ML training — required for GDPR"
     path        = "policies/ai-opt-out/ai-opt-out-all.json"
     targets     = ["root"]
   }
@@ -67,9 +68,9 @@ ct_baseline_version             = "5.0"
 ct_identity_center_baseline_arn = ""
 enable_ram_sharing              = false
 
-# Data residency controls — prevent anything from leaving the region
+# Data residency controls — prevent anything from leaving the Region
 ct_controls = [
-  # Cross-region / egress prevention
+  # Cross-Region / egress prevention
   { control = "AWS-GR_DISALLOW_CROSS_REGION_NETWORKING", target = "eu-workloads" },
   { control = "AWS-GR_DISALLOW_CROSS_REGION_NETWORKING", target = "us-workloads" },
   { control = "AWS-GR_DISALLOW_VPC_INTERNET_ACCESS", target = "eu-workloads" },

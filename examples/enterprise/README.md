@@ -36,10 +36,10 @@ Plus:
 - **AI opt-out** attached at the root — opts the whole organization out of AI service content use
 - **Chat applications policy** at the root — only approved Slack workspaces and Teams allowed
 - **Tag policies** mandatory + recommended on all custom OUs
-- **AWS Control Tower controls** for encryption, network, S3, logging, and IAM across Workloads
+- **AWS Control Tower controls** for encryption, network, S3, logging, and IAM across the Workloads and Data OUs
 - **All 14 service delegations** pointing to purpose-specific member accounts
 - **RAM sharing** enabled organization-wide
-- **Identity Center baseline** configured
+- **AWS IAM Identity Center baseline** configured
 
 ## Key Customizations (Required)
 
@@ -54,7 +54,7 @@ Replace these placeholders with your actual account IDs:
 
 Also:
 
-- Set `ct_identity_center_baseline_arn` to your actual baseline ARN (get it via `aws controltower list-enabled-baselines`)
+- Set `ct_identity_center_baseline_arn` to your actual baseline ARN (get it by running `aws controltower list-enabled-baselines`)
 - Change `breakglass_role` to match your break-glass IAM role name
 
 ## Apply

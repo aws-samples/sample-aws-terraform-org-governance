@@ -41,7 +41,7 @@ resource "aws_organizations_policy_attachment" "scp" {
 }
 
 ################################################################################
-# Resource Control Policies (RCPs)
+# Resource control policies (RCPs)
 #
 # RCPs restrict what can be done to resources in your accounts, even by
 # external principals and AWS services. Complement SCPs which only restrict
@@ -115,8 +115,8 @@ resource "aws_organizations_policy_attachment" "tagging_policy" {
 ################################################################################
 # Backup Policies
 #
-# Org-wide AWS Backup plans applied to member accounts via AWS Backup org
-# integration.
+# Organization-wide AWS Backup plans applied to member accounts through the
+# AWS Backup organization integration.
 ################################################################################
 
 resource "aws_organizations_policy" "backup" {
@@ -150,10 +150,11 @@ resource "aws_organizations_policy_attachment" "backup" {
 }
 
 ################################################################################
-# AI Services Opt-Out Policies
+# AI services opt-out policies
 #
-# Opt the organization out of AWS using your content for AI/ML service
-# improvement (Rekognition, Transcribe, Comprehend, Textract, etc.).
+# Opt the organization out of AWS using your content for AI and ML service
+# improvement (Amazon Rekognition, Amazon Transcribe, Amazon Comprehend and
+# Amazon Textract, among others).
 ################################################################################
 
 resource "aws_organizations_policy" "ai_opt_out" {
@@ -189,7 +190,7 @@ resource "aws_organizations_policy_attachment" "ai_opt_out" {
 ################################################################################
 # Chat applications policies
 #
-# Restrict which Slack workspaces and Microsoft Teams channels can integrate
+# Restrict which Slack workspaces and Microsoft Teams teams can integrate
 # with AWS accounts through Amazon Q Developer in chat applications.
 ################################################################################
 

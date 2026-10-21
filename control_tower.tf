@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT-0
 
 ################################################################################
-# Control Tower Controls
+# AWS Control Tower controls
 ################################################################################
 
 resource "aws_controltower_control" "controls" {

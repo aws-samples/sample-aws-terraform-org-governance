@@ -23,10 +23,10 @@
 # All 14 service delegations point to purpose-specific accounts.
 # Foundation SCPs applied across all custom OUs.
 # RCP: require SSL + confused-deputy protection on Workloads/Data.
-# Backup policy: daily + weekly with DR region copy on Workloads/Data.
+# Backup policy: daily + weekly with DR Region copy on Workloads/Data.
 # AI opt-out: organization-wide opt out of AI service content use.
 # Chat applications policy: restrict to approved Slack workspaces and Microsoft Teams teams.
-# AWS Control Tower controls for encryption, network, S3, logging, and IAM across Workloads.
+# AWS Control Tower controls for encryption, network, S3, logging, and IAM across the Workloads and Data OUs.
 # Tag policies enforced everywhere.
 
 tags = {
@@ -89,7 +89,7 @@ organization = {
 
 scp_policies = {
   "scp-foundation-guardrails" = {
-    description = "Foundation: deny org leave, IMDSv2, encryption, RAM external sharing"
+    description = "Foundation: deny leaving the organization, require IMDSv2, require encryption, block external AWS RAM sharing"
     path        = "policies/scp/scp-foundation-guardrails.json.tpl"
     vars        = { breakglass_role = "BreakGlass-Admin" }
     targets     = ["infrastructure", "workloads", "deployments", "data"]
@@ -117,7 +117,7 @@ rcp_policies = {
 
 backup_policies = {
   "backup-critical-daily-weekly" = {
-    description = "Daily + weekly backups with DR region copy for resources tagged BackupTier=critical"
+    description = "Daily + weekly backups with DR Region copy for resources tagged BackupTier=critical"
     path        = "policies/backup/backup-policy-critical-daily-weekly.json.tpl"
     vars = {
       primary_region = "us-east-1"
@@ -131,7 +131,7 @@ backup_policies = {
 
 ai_opt_out_policies = {
   "ai-opt-out-all" = {
-    description = "Opt out of AWS using org content for AI/ML service improvement"
+    description = "Opt out of AWS using organization content for AI and ML service improvement"
     path        = "policies/ai-opt-out/ai-opt-out-all.json"
     targets     = ["root"]
   }
