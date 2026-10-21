@@ -11,7 +11,7 @@ variable "tags" {
 }
 
 variable "aws_region" {
-  description = "AWS region for the provider. Should match your Control Tower home region."
+  description = "AWS Region for the provider. This should match your AWS Control Tower home Region."
   type        = string
   default     = "us-east-1"
 
@@ -62,13 +62,13 @@ variable "organization" {
 ################################################################################
 
 variable "ct_baseline_version" {
-  description = "CT baseline version to enable on governed OUs"
+  description = "AWS Control Tower baseline version to enable on governed OUs"
   type        = string
   default     = "5.0"
 
   validation {
     condition     = can(regex("^[0-9]+\\.[0-9]+$", var.ct_baseline_version))
-    error_message = "CT baseline version must be in format X.Y (e.g., 5.0)."
+    error_message = "The AWS Control Tower baseline version must be in the format X.Y, for example 5.0."
   }
 }
 
@@ -84,7 +84,7 @@ variable "ct_identity_center_baseline_arn" {
 }
 
 variable "ct_controls" {
-  description = "CT control assignments — each entry maps a control name to a target OU key. Controls target OUs only, never the root."
+  description = "AWS Control Tower control assignments — each entry maps a control name to a target OU key. Controls target OUs only, never the root."
   type = list(object({
     control = string
     target  = string
@@ -93,12 +93,12 @@ variable "ct_controls" {
 
   validation {
     condition     = alltrue([for c in var.ct_controls : length(c.control) > 0 && length(c.target) > 0])
-    error_message = "Each CT control must have a non-empty control name and target OU key."
+    error_message = "Each AWS Control Tower control must have a non-empty control name and target OU key."
   }
 
   validation {
     condition     = alltrue([for c in var.ct_controls : contains(keys(local.ct_control_ids), c.control)])
-    error_message = "Unknown CT control name(s): ${join(", ", [for c in var.ct_controls : c.control if !contains(keys(local.ct_control_ids), c.control)])}. Add the global identifier to ct_controls_definition.tf — see https://docs.aws.amazon.com/controltower/latest/controlreference/all-global-identifiers.html"
+    error_message = "Unknown AWS Control Tower control name(s): ${join(", ", [for c in var.ct_controls : c.control if !contains(keys(local.ct_control_ids), c.control)])}. Add the global identifier to ct_controls_definition.tf — see https://docs.aws.amazon.com/controltower/latest/controlreference/all-global-identifiers.html"
   }
 }
 

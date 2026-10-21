@@ -2,7 +2,7 @@
 #
 # Use case: A growing company that wants foundational guardrails,
 # tag governance, and a sensible OU hierarchy. No service delegation
-# or CT controls yet — add those as the org matures.
+# or AWS Control Tower controls yet — add those as the org matures.
 #
 # What this sets up:
 #   Root

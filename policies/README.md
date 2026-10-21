@@ -19,13 +19,13 @@ Restrict what IAM principals in your organization's member accounts can do. Deny
 | -------------------------------------------- | ---------------------------------------------------------------------------------- | ------------------------------------ |
 | `scp/scp-foundation-guardrails.json.tpl`     | Deny organization leave, IMDSv2 required, EBS/RDS encryption, block external RAM sharing    | `breakglass_role`                    |
 | `scp/scp-deny-root-user.json.tpl`            | Deny all root user actions; deny creating root access keys                         | —                                    |
-| `scp/scp-deny-iam-user-creation.json.tpl`    | Force SSO; block creating IAM users, passwords, access keys                        | `breakglass_role`                    |
+| `scp/scp-deny-iam-user-creation.json.tpl`    | Require federated access through AWS IAM Identity Center; block creating IAM users, passwords, and access keys                        | `breakglass_role`                    |
 | `scp/scp-require-imdsv2.json.tpl`            | Deny launching EC2 without IMDSv2, enforce hop limit ≤ 2                           | `breakglass_role`                    |
 | `scp/scp-s3-encryption-ssl.json`             | Require SSE on PUT, require SSL, block disabling account-level public access block | —                                    |
 | `scp/scp-require-tags-on-create.json.tpl`    | Require Environment/Team/CostCenter tags on EC2, RDS, S3, EBS                      | —                                    |
 | `scp/scp-region-restriction.json.tpl`        | Deny API calls outside allowed Regions (global services exempted)               | `allowed_regions`, `breakglass_role` |
-| `scp/scp-protect-security-services.json.tpl` | Prevent disabling CloudTrail, GuardDuty, Config, SecurityHub                       | `breakglass_role`                    |
-| `scp/scp-deny-expensive-services.json`       | Block expensive services (Redshift, EMR, SageMaker) and large instance families    | —                                    |
+| `scp/scp-protect-security-services.json.tpl` | Prevent disabling AWS CloudTrail, Amazon GuardDuty, AWS Config, and AWS Security Hub CSPM                       | `breakglass_role`                    |
+| `scp/scp-deny-expensive-services.json`       | Block expensive services (Amazon Redshift, Amazon EMR, Amazon SageMaker AI) and large instance families    | —                                    |
 
 ## Resource Control Policies (RCPs)
 
@@ -36,7 +36,7 @@ Restrict what can be done _to resources in your accounts_, even by external prin
 | `rcp/rcp-require-ssl.json`                            | Deny non-SSL access to S3, SQS, Secrets Manager — applies even for cross-account access       | —             |
 | `rcp/rcp-enforce-confused-deputy-protection.json.tpl` | Block access from outside your organization ID; require `aws:SourceAccount` when services assume roles | —             |
 
-> **Note:** RCPs require `RESOURCE_CONTROL_POLICY` to be enabled on your organization root. The module does not yet manage this — run:
+> **Note:** RCPs require `RESOURCE_CONTROL_POLICY` to be enabled on your organization root. The sample code does not manage this — run:
 >
 > ```bash
 > aws organizations enable-policy-type --root-id r-xxxx --policy-type RESOURCE_CONTROL_POLICY
@@ -143,7 +143,7 @@ Most templated policies exclude a `breakglass_role` so you can recover if the po
 
 ## Authoring Tips
 
-- **Stay under 5120 bytes** for SCPs and RCPs after rendering. The module enforces this.
+- **Stay under the per-type limit after rendering**: 10,240 characters for an SCP and 5,120 for an RCP. The sample code enforces this as a plan-time precondition.
 - **Always test in a sandbox OU first.** Policies apply immediately to all accounts.
 - **Use `NotAction` sparingly** — over-denying is the #1 cause of lockout.
 - **Use IAM Access Analyzer policy validation** on rendered JSON before committing.

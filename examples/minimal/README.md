@@ -12,8 +12,8 @@ Lay down an OU hierarchy on top of AWS Control Tower — nothing else.
 
 ```
 Root
-├── Security        (CT-managed — not in this config)
-├── Sandbox         (CT-managed — not in this config)
+├── Security        (managed by AWS Control Tower — not in this config)
+├── Sandbox         (managed by AWS Control Tower — not in this config)
 ├── Infrastructure  ← created
 └── Workloads       ← created
 ```

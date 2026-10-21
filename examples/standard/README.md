@@ -12,8 +12,8 @@ Typical setup for a growing company — OU hierarchy, foundation SCP, an SSL-enf
 
 ```
 Root
-├── Security        (CT-managed — not in this config)
-├── Sandbox         (CT-managed — not in this config)
+├── Security        (managed by AWS Control Tower — not in this config)
+├── Sandbox         (managed by AWS Control Tower — not in this config)
 ├── Infrastructure  ← created
 └── Workloads       ← created
     ├── Production

@@ -16,7 +16,7 @@
 #
 # Key differences from standard:
 # - Region-locked via SCP (only us-east-1 and us-west-2)
-# - Root user restrictions enforced via CT controls
+# - Root user restrictions enforced via AWS Control Tower controls
 # - MFA required
 # - Full encryption enforced (EBS, RDS)
 # - All logging controls enabled

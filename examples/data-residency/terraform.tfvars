@@ -8,7 +8,7 @@
 #   ├── EU-Workloads     (locked to eu-west-1, eu-central-1)
 #   └── US-Workloads     (locked to us-east-1, us-west-2)
 #
-# Data residency is enforced via the CT Region Deny control plus
+# Data residency is enforced via the AWS Control Tower Region deny control plus
 # data-residency specific controls that prevent cross-region networking
 # and public access.
 #

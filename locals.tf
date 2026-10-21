@@ -18,7 +18,7 @@ locals {
 
   root_ou = data.aws_organizations_organization.this.roots[0].id
 
-  # CT baseline ARN — constructed from provider region.
+  # AWS Control Tower baseline ARN — constructed from the provider Region.
   # "17BSJV3IGJ2QSGA2" is the fixed global identifier for the built-in
   # AWSControlTowerBaseline. It is stable across accounts and regions.
   # To confirm for your deployment, run:
@@ -220,7 +220,7 @@ locals {
   ])
 
   ##############################################################################
-  # CT control attachments
+  # AWS Control Tower control attachments
   ##############################################################################
 
   ct_control_attachments = {

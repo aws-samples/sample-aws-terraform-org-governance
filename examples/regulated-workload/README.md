@@ -43,7 +43,7 @@ Plus:
 ## What's Intentionally Excluded
 
 - **No RAM sharing** — regulated workloads typically shouldn't share resources freely
-- **No non-security delegations** — keeps Backup/SSM/IPAM isolated from security tooling
+- **No non-security delegations** — keeps AWS Backup, AWS Systems Manager, and Amazon VPC IPAM isolated from security tooling
 - **Non-Regulated OU doesn't get strict AWS Control Tower controls** — keep dev productive, only enforce on Regulated
 
 ## Apply
