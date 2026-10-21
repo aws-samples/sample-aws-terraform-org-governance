@@ -131,7 +131,7 @@ locals {
   }
 
   ##############################################################################
-  # Chatbot policy content + attachments
+  # Chat applications policy content + attachments
   ##############################################################################
 
   chatbot_content = {

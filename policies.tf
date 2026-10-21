@@ -187,10 +187,10 @@ resource "aws_organizations_policy_attachment" "ai_opt_out" {
 }
 
 ################################################################################
-# Chatbot Policies
+# Chat applications policies
 #
 # Restrict which Slack workspaces and Microsoft Teams channels can integrate
-# with AWS accounts via AWS Chatbot.
+# with AWS accounts through Amazon Q Developer in chat applications.
 ################################################################################
 
 resource "aws_organizations_policy" "chatbot" {
@@ -204,7 +204,7 @@ resource "aws_organizations_policy" "chatbot" {
   lifecycle {
     precondition {
       condition     = length(local.chatbot_content[each.key]) <= 10000
-      error_message = "Chatbot policy '${each.key}' exceeds the 10000-character AWS limit after rendering (${length(local.chatbot_content[each.key])} characters)."
+      error_message = "Chat applications policy '${each.key}' exceeds the 10000-character AWS limit after rendering (${length(local.chatbot_content[each.key])} characters)."
     }
   }
 }
@@ -218,7 +218,7 @@ resource "aws_organizations_policy_attachment" "chatbot" {
   lifecycle {
     precondition {
       condition     = contains(keys(local.policy_target_ids), lower(each.value.target))
-      error_message = "Chatbot policy '${each.value.name}' targets '${each.value.target}', which is not an OU key defined in var.organization, an OU already under the root, or \"root\"."
+      error_message = "Chat applications policy '${each.value.name}' targets '${each.value.target}', which is not an OU key defined in var.organization, an OU already under the root, or \"root\"."
     }
   }
 }

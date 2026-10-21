@@ -178,11 +178,11 @@ variable "ai_opt_out_policies" {
 }
 
 ################################################################################
-# Chatbot Policies
+# Chat applications policies
 ################################################################################
 
 variable "chatbot_policies" {
-  description = "AWS Chatbot policies — restrict which Slack/Teams integrations can interact with AWS accounts."
+  description = "Chat applications policies — restrict which Slack workspaces and Microsoft Teams channels can reach your accounts through Amazon Q Developer in chat applications."
   type = map(object({
     description = string
     path        = string

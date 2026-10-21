@@ -25,8 +25,8 @@
 # RCP: require SSL + confused-deputy protection on Workloads/Data.
 # Backup policy: daily + weekly with DR region copy on Workloads/Data.
 # AI opt-out: organization-wide opt out of AI service content use.
-# Chatbot policy: restrict to approved Slack workspaces and Teams.
-# CT controls for encryption, network, S3, logging, and IAM across Workloads.
+# Chat applications policy: restrict to approved Slack workspaces and Microsoft Teams teams.
+# AWS Control Tower controls for encryption, network, S3, logging, and IAM across Workloads.
 # Tag policies enforced everywhere.
 
 tags = {
@@ -139,7 +139,7 @@ ai_opt_out_policies = {
 
 chatbot_policies = {
   "chatbot-approved-workspaces" = {
-    description = "Only allow Chatbot integrations with approved Slack workspaces and Teams"
+    description = "Allow only approved Slack workspaces and Microsoft Teams teams"
     path        = "policies/chatbot/chatbot-restrict-to-approved-workspaces.json.tpl"
     vars = {
       slack_workspace_ids = "[\"T0123456789\"]"
