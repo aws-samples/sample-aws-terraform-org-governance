@@ -4,7 +4,8 @@
 # requiring strict control over regions, encryption, MFA, and auditability.
 #
 # Assumes you have a dedicated Security Tooling account for central
-# GuardDuty, SecurityHub, Config, and CloudTrail management.
+# Amazon GuardDuty, AWS Security Hub CSPM, AWS Config, and AWS CloudTrail
+# management.
 #
 # What this sets up:
 #   Root
@@ -19,7 +20,7 @@
 # - Root user restrictions enforced via AWS Control Tower controls
 # - MFA required
 # - Full encryption enforced (EBS, RDS)
-# - All logging controls enabled
+# - Detective check that member accounts have AWS CloudTrail enabled
 # - RCP: require SSL + confused-deputy protection (blocks external principals)
 # - Backup: daily + weekly with cross-region DR copy for BackupTier=critical
 # - AI opt-out: prevent AWS from using content for AI/ML training (HIPAA/PCI)
@@ -130,17 +131,10 @@ ct_controls = [
   { control = "AWS-GR_IAM_USER_MFA_ENABLED", target = "regulated" },
   { control = "AWS-GR_MFA_ENABLED_FOR_IAM_CONSOLE_ACCESS", target = "regulated" },
 
-  # Audit trail integrity
-  { control = "AWS-GR_CLOUDTRAIL_ENABLED", target = "regulated" },
-  { control = "AWS-GR_CLOUDTRAIL_VALIDATION_ENABLED", target = "regulated" },
-  { control = "AWS-GR_CLOUDTRAIL_CHANGE_PROHIBITED", target = "regulated" },
-  { control = "AWS-GR_CLOUDTRAIL_CLOUDWATCH_LOGS_ENABLED", target = "regulated" },
-  { control = "AWS-GR_AUDIT_BUCKET_DELETION_PROHIBITED", target = "regulated" },
-
-  # Config
-  { control = "AWS-GR_CONFIG_ENABLED", target = "regulated" },
-  { control = "AWS-GR_CONFIG_CHANGE_PROHIBITED", target = "regulated" },
-  { control = "AWS-GR_CONFIG_RULE_CHANGE_PROHIBITED", target = "regulated" },
+  # Audit trail. The mandatory AWS Control Tower controls already protect the
+  # organization trail, AWS Config and the log archive. The control APIs cannot
+  # enable mandatory controls, so this list leaves them out.
+  { control = "AWS-GR_DETECT_CLOUDTRAIL_ENABLED_ON_MEMBER_ACCOUNTS", target = "regulated" },
 ]
 
 tagging_policies = {

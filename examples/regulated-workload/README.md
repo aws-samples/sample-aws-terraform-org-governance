@@ -31,7 +31,7 @@ Plus:
   - Network isolation (no public IPs, restricted ports, VPC public access blocked)
   - Data protection (S3 public prohibited, versioning, snapshot public blocked)
   - Identity (root user restricted, MFA required everywhere)
-  - Audit trail (CloudTrail enabled + validated + logs intact, Config enabled)
+  - Audit trail (detective check that member accounts have AWS CloudTrail enabled)
 - **Delegation** — all security services delegated to one Security Tooling account
 
 ## Key Customizations (Required)
@@ -43,6 +43,7 @@ Plus:
 ## What's Intentionally Excluded
 
 - **No RAM sharing** — regulated workloads typically shouldn't share resources freely
+- **No mandatory AWS Control Tower controls** — AWS Control Tower already applies the mandatory controls that protect its AWS CloudTrail, AWS Config and log archive resources, and the control APIs cannot enable them on an OU
 - **No non-security delegations** — keeps AWS Backup, AWS Systems Manager, and Amazon VPC IPAM isolated from security tooling
 - **Non-Regulated OU doesn't get strict AWS Control Tower controls** — keep dev productive, only enforce on Regulated
 

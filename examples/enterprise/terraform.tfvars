@@ -166,8 +166,7 @@ ct_controls = [
   { control = "AWS-GR_S3_BUCKET_PUBLIC_WRITE_PROHIBITED", target = "data" },
 
   # Logging
-  { control = "AWS-GR_CLOUDTRAIL_VALIDATION_ENABLED", target = "workloads" },
-  { control = "AWS-GR_CLOUDTRAIL_VALIDATION_ENABLED", target = "infrastructure" },
+  { control = "AWS-GR_DETECT_CLOUDTRAIL_ENABLED_ON_MEMBER_ACCOUNTS", target = "workloads" },
 
   # IAM
   { control = "AWS-GR_IAM_USER_MFA_ENABLED", target = "workloads" },
