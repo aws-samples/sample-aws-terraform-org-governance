@@ -2,16 +2,6 @@
 # SPDX-License-Identifier: MIT-0
 
 ################################################################################
-# Organizations delegation
-################################################################################
-
-resource "aws_organizations_delegated_administrator" "organizations" {
-  count             = var.enable_delegation.organizations != null ? 1 : 0
-  account_id        = var.enable_delegation.organizations.account_id
-  service_principal = "organizations.amazonaws.com"
-}
-
-################################################################################
 # CloudFormation StackSets delegation
 ################################################################################
 

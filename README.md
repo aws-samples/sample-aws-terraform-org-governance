@@ -1,6 +1,6 @@
 # sample-aws-terraform-org-governance
 
-Terraform sample code for managing governance in AWS Organizations on top of an existing AWS Control Tower landing zone. Covers OU hierarchies, six of the AWS Organizations policy types (service control, resource control, tag, backup, AI services opt-out, and chat applications policies), AWS Control Tower baselines and controls, and delegated administrator configuration for 15 AWS services.
+Terraform sample code for managing governance in AWS Organizations on top of an existing AWS Control Tower landing zone. Covers OU hierarchies, six of the AWS Organizations policy types (service control, resource control, tag, backup, AI services opt-out, and chat applications policies), AWS Control Tower baselines and controls, and delegated administrator configuration for 14 AWS services.
 
 ## Disclaimer
 
@@ -32,7 +32,7 @@ Note the following four behaviors:
 3. **Controls target OUs, never the root.** AWS Control Tower controls resolve to an OU ARN, so `"root"` is not an addressable target for them the way it is for policies.
 4. **AWS Resource Access Manager (AWS RAM) sharing is a single organization-wide toggle** with no OU dimension at all.
 
-The figure shows the delegated administrator as a separate account. Conventionally it sits inside the `Security` OU, where AWS Control Tower places the Audit account, but this sample takes only an account ID and does not constrain where that account lives. The figure shows four of the 15 supported services; [Delegated administration](#delegated-administration) has the complete list.
+The figure shows the delegated administrator as a separate account. Conventionally it sits inside the `Security` OU, where AWS Control Tower places the Audit account, but this sample takes only an account ID and does not constrain where that account lives. The figure shows four of the 14 supported services; [Delegated administration](#delegated-administration) has the complete list.
 
 ### Ownership boundary
 
@@ -44,7 +44,7 @@ This sample assumes that AWS Control Tower already exists, and it stops at that 
 | Six AWS Organizations policy types, and their attachments       | The landing zone itself, and its own mandatory controls            |
 | Which AWS Control Tower baseline version each OU is registered at   | The baseline's contents                                              |
 | Which controls are enabled on which OU                         | The control catalog                                                  |
-| Delegated administrator designation for 15 services            | —                                                                    |
+| Delegated administrator designation for 14 services            | —                                                                    |
 
 Declaring an AWS Control Tower OU in `var.organization` would make Terraform try to create it and fail. Targeting one from a policy or a control is supported and expected — see [Addressing targets](#addressing-targets).
 
@@ -72,13 +72,17 @@ Most of the ordering is implicit; it falls out of one resource referencing anoth
 
 ### Delegated administration
 
-![The 15 AWS services whose administration this configuration can delegate to a member account](docs/diagrams/org-delegated-admin.svg)
+![The 14 AWS services whose administration this configuration can delegate to a member account](docs/diagrams/org-delegated-admin.svg)
 
 Every service above is optional and is enabled by setting a member account ID; leave one unset to skip it. The governance topology figure shows only four of them, so this figure is the complete list.
 
-Two icons are borrowed from the correct console family because no icon exists for the feature itself, each labeled with its precise official name: **AWS Identity and Access Management** stands for IAM Access Analyzer, and **Amazon Virtual Private Cloud** for IP Address Manager.
+Two icons are borrowed from the parent service because no icon exists for the feature itself: the AWS Identity and Access Management icon stands for IAM Access Analyzer, and the Amazon Virtual Private Cloud icon for Amazon VPC IP Address Manager.
 
-The delegation mechanism is not uniform, which matters when scoping the deploying role's permissions. AWS Backup, AWS CloudFormation StackSets, AWS Config, IAM Access Analyzer, AWS IAM Identity Center, AWS Organizations, and AWS Systems Manager use `organizations:RegisterDelegatedAdministrator`. Amazon GuardDuty, AWS Security Hub CSPM, Amazon Detective, and Amazon Macie each use their own `EnableOrganizationAdminAccount` action; Amazon Inspector uses `inspector2:EnableDelegatedAdminAccount`, AWS Firewall Manager `fms:AssociateAdminAccount`, Amazon VPC IP Address Manager `ec2:EnableIpamOrganizationAdminAccount`, and AWS CloudTrail `cloudtrail:RegisterOrganizationDelegatedAdmin`.
+The delegation mechanism is not uniform, which matters when scoping the deploying role's permissions. AWS Backup, AWS CloudFormation StackSets, AWS Config, IAM Access Analyzer, AWS IAM Identity Center, and AWS Systems Manager use `organizations:RegisterDelegatedAdministrator`. Amazon GuardDuty, AWS Security Hub CSPM, Amazon Detective, and Amazon Macie each use their own `EnableOrganizationAdminAccount` action; Amazon Inspector uses `inspector2:EnableDelegatedAdminAccount`, AWS Firewall Manager `fms:AssociateAdminAccount`, Amazon VPC IP Address Manager `ec2:EnableIpamOrganizationAdminAccount`, and AWS CloudTrail `cloudtrail:RegisterOrganizationDelegatedAdmin`.
+
+> **Note:** The `config` entry registers `config.amazonaws.com`, the delegated administrator for AWS Config multi-account data aggregation. Organization AWS Config rules and conformance packs use a separate registration with `config-multiaccountsetup.amazonaws.com`, which this sample does not create.
+
+> **Note:** AWS Organizations policy management is not delegated through `RegisterDelegatedAdministrator`. To delegate it, use a [resource-based delegation policy](https://docs.aws.amazon.com/organizations/latest/userguide/orgs_delegate_policies.html), which this sample does not manage.
 
 > **Note:** Setting the Macie delegation also enables Macie in the management account, because AWS requires that before a Macie delegated administrator can be designated.
 
@@ -98,7 +102,7 @@ All four figures use the official AWS Architecture Icons and are rendered to SVG
 
    AWS Organizations has more policy types, such as Amazon EC2 declarative policies, Security Hub policies, Amazon Inspector policies, Amazon Bedrock policies, Amazon S3 policies, Amazon GuardDuty policies, and upgrade rollout policies. This sample does not manage them.
 4. Enables AWS Control Tower controls on target OUs (legacy `AWS-GR_*` and proactive `CT.*`/`SH.*` controls)
-5. Delegates administration of 15 AWS services to designated member accounts
+5. Delegates administration of 14 AWS services to designated member accounts
 6. Optionally enables organization-wide AWS RAM sharing
 7. Ships with a reusable policy template library and five scenario-based examples (minimal, standard, enterprise, regulated-workload, data-residency)
 
@@ -129,7 +133,7 @@ All four figures use the official AWS Architecture Icons and are rendered to SVG
 1. Pick an example from [`examples/`](./examples) that matches your use case:
    - [`minimal`](./examples/minimal) — OU hierarchy only, nothing else
    - [`standard`](./examples/standard) — SCP + RCP + tag policies + daily backup plan
-   - [`enterprise`](./examples/enterprise) — all six managed policy types, 15 delegations, broad AWS Control Tower controls
+   - [`enterprise`](./examples/enterprise) — all six managed policy types, 14 delegations, broad AWS Control Tower controls
    - [`regulated-workload`](./examples/regulated-workload) — strict encryption/MFA/audit + RCP + critical-tier backup + AI opt-out
    - [`data-residency`](./examples/data-residency) — Region-locked OUs + SSL-required RCP + AI opt-out
 2. Customize the chosen example's `terraform.tfvars` in place (set `aws_region`, account IDs, OU names, etc.)
@@ -186,7 +190,6 @@ This is a root deployment that does not consume external modules — all resourc
 | `aws_vpc_ipam_organization_admin_account.this`              | resource |
 | `aws_cloudtrail_organization_delegated_admin_account.this`  | resource |
 | `aws_iam_service_linked_role.access_analyzer`               | resource |
-| `aws_organizations_delegated_administrator.organizations`   | resource |
 | `aws_organizations_delegated_administrator.stacksets`       | resource |
 | `aws_organizations_delegated_administrator.access_analyzer` | resource |
 | `aws_organizations_delegated_administrator.config`          | resource |
@@ -214,7 +217,7 @@ This is a root deployment that does not consume external modules — all resourc
 | `ct_baseline_version`             | AWS Control Tower baseline version — must be compatible with your landing zone version                             | `string`       | `"5.0"`       | no       |
 | `ct_identity_center_baseline_arn` | AWS IAM Identity Center baseline ARN — required when you enable IAM Identity Center                                 | `string`       | `""`          | no       |
 | `enable_ram_sharing`              | Allow cross-account resource sharing within the organization through AWS RAM                                       | `bool`         | `false`       | no       |
-| `enable_delegation`               | Delegate AWS service admin to member accounts (15 services)                                                        | `object`       | `{}`          | no       |
+| `enable_delegation`               | Delegate AWS service admin to member accounts (14 services)                                                        | `object`       | `{}`          | no       |
 
 ## Outputs
 
@@ -397,7 +400,7 @@ enable_delegation = {
 }
 ```
 
-Supported services, by configuration key: `access_analyzer` (IAM Access Analyzer), `backup` (AWS Backup), `cloudtrail` (AWS CloudTrail), `config` (AWS Config), `detective` (Amazon Detective), `firewall_manager` (AWS Firewall Manager), `guardduty` (Amazon GuardDuty), `inspector` (Amazon Inspector), `ipam` (Amazon VPC IP Address Manager), `macie` (Amazon Macie), `organizations` (AWS Organizations), `securityhub` (AWS Security Hub CSPM), `sso` (AWS IAM Identity Center), `stacksets` (AWS CloudFormation StackSets), `systems_manager` (AWS Systems Manager).
+Supported services, by configuration key: `access_analyzer` (IAM Access Analyzer), `backup` (AWS Backup), `cloudtrail` (AWS CloudTrail), `config` (AWS Config), `detective` (Amazon Detective), `firewall_manager` (AWS Firewall Manager), `guardduty` (Amazon GuardDuty), `inspector` (Amazon Inspector), `ipam` (Amazon VPC IP Address Manager), `macie` (Amazon Macie), `securityhub` (AWS Security Hub CSPM), `sso` (AWS IAM Identity Center), `stacksets` (AWS CloudFormation StackSets), `systems_manager` (AWS Systems Manager).
 
 > **Note:** Setting `macie` also enables Amazon Macie in the management account (`aws_macie2_account`), which AWS requires before a delegated administrator can be designated. Removing the `macie` entry later disables it again.
 
@@ -419,7 +422,7 @@ Supported services, by configuration key: `access_analyzer` (IAM Access Analyzer
 ├── examples/                    # Use-case-specific tfvars — pass via -var-file
 │   ├── minimal/                 # OU hierarchy only
 │   ├── standard/                # SCP + RCP + tag policies + daily backup
-│   ├── enterprise/              # All six managed policy types, 15 delegations, broad AWS Control Tower controls
+│   ├── enterprise/              # All six managed policy types, 14 delegations, broad AWS Control Tower controls
 │   ├── regulated-workload/      # Strict encryption/MFA/audit + RCP + critical-tier backup + AI opt-out
 │   └── data-residency/          # Region-locked OUs + SSL-required RCP + AI opt-out
 └── policies/

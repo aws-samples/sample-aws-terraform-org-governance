@@ -20,7 +20,7 @@
 #       ├── Analytics
 #       └── Data Lake
 #
-# All 15 service delegations point to purpose-specific accounts.
+# All 14 service delegations point to purpose-specific accounts.
 # Foundation SCPs applied across all custom OUs.
 # RCP: require SSL + confused-deputy protection on Workloads/Data.
 # Backup policy: daily + weekly with DR region copy on Workloads/Data.
@@ -198,7 +198,6 @@ enable_delegation = {
   inspector        = { account_id = "111111111111" } # Security Tooling account
   ipam             = { account_id = "333333333333" } # Network account
   macie            = { account_id = "111111111111" } # Security Tooling account
-  organizations    = { account_id = "444444444444" } # Automation account
   securityhub      = { account_id = "111111111111" } # Security Tooling account
   sso              = { account_id = "555555555555" } # Identity account
   stacksets        = { account_id = "222222222222" } # Infrastructure account

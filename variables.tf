@@ -219,7 +219,6 @@ variable "enable_delegation" {
     inspector        = optional(object({ account_id = string }), null)
     ipam             = optional(object({ account_id = string }), null)
     macie            = optional(object({ account_id = string }), null)
-    organizations    = optional(object({ account_id = string }), null)
     securityhub      = optional(object({ account_id = string }), null)
     sso              = optional(object({ account_id = string }), null)
     stacksets        = optional(object({ account_id = string }), null)
