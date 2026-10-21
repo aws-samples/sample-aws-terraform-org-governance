@@ -26,7 +26,7 @@ Plus:
   - VPC internet access blocked
   - VPN connections blocked
   - S3 cross-Region replication restricted
-  - Public IPs prohibited (RDS, EC2, Lambda, OpenSearch, SageMaker)
+  - Public IPs prohibited (Amazon RDS, Amazon EC2, AWS Lambda, Amazon OpenSearch Service, Amazon SageMaker AI)
   - IGW routes unrestricted blocked
 - **Tag policy** mandatory
 
@@ -41,7 +41,7 @@ Plus:
   - Add a Region restriction SCP with `aws:RequestedRegion` conditions
   - Use the AWS Control Tower Region deny control at the OU level
   - Set `ct_baseline_version` matching the version that includes Region governance
-- Some services are global (IAM, CloudFront, Route53) and cannot be Region-locked via IAM conditions alone
+- Some services are global (AWS Identity and Access Management, Amazon CloudFront, Amazon Route 53) and cannot be Region-locked by IAM conditions alone
 
 ## Apply
 

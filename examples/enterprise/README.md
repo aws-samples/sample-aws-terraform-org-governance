@@ -5,7 +5,7 @@ All features enabled — suitable for large organizations with mature security p
 ## When to Use
 
 - You have dedicated accounts for Security Tooling, Network, Identity, and Infrastructure
-- You want every AWS Control Tower control, every delegation, and full tag governance
+- You want broad AWS Control Tower control coverage, every delegation, and full tag governance
 - You're ready to manage 10+ accounts across multiple environments
 
 ## What Gets Created

@@ -1,10 +1,10 @@
 # Standard Example
 
-Typical setup for a growing company — OU hierarchy, foundation SCP, and tag governance. No service delegation or AWS Control Tower controls yet.
+Typical setup for a growing company — OU hierarchy, foundation SCP, an SSL-enforcing RCP, tag governance, and a daily backup plan. No service delegation or AWS Control Tower controls yet.
 
 ## When to Use
 
-- You're past first-time setup and want baseline controls.
+- You're past first-time setup and want a baseline set of policies in place.
 - You haven't yet designated dedicated Security/Network/Automation accounts.
 - You want tag enforcement to start building cost-allocation hygiene.
 
@@ -37,7 +37,7 @@ Plus:
 ## Next Steps
 
 - Add AWS Control Tower controls for encryption, S3 public access, and IAM MFA (see `enterprise`)
-- Delegate GuardDuty / SecurityHub / Config to a dedicated Security Tooling account (see `enterprise`)
+- Delegate Amazon GuardDuty, AWS Security Hub CSPM, and AWS Config to a dedicated Security Tooling account (see `enterprise`)
 
 ## Apply
 
